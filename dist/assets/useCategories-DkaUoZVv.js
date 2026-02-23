@@ -1,0 +1,1 @@
+import{u as s}from"./vendor-query-Bcn4Fvtg.js";import{c as r,e as a}from"./api--gIgMF1d.js";const e={all:["categories"],lists:()=>[...e.all,"list"],trees:()=>[...e.all,"tree"],details:()=>[...e.all,"detail"],detail:t=>[...e.details(),t]},o=()=>s({queryKey:e.lists(),queryFn:async()=>{const t=await r.getAll();return a(t)}});export{o as u};

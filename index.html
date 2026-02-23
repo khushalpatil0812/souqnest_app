@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SouqNest - B2B Industrial Marketplace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  </head>
+  <body>
+    <div id="scroll-bar"></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      window.addEventListener('scroll',()=>{
+        const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+        const bar=document.getElementById('scroll-bar');
+        if(bar) bar.style.width=pct+'%';
+        const nav=document.querySelector('nav') || document.querySelector('.navbar');
+        if(nav) nav.style.boxShadow=window.scrollY>60 ? '0 4px 20px rgba(0,0,0,0.1)' : 'var(--shadow-soft)';
+      });
+      const observer=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+      },{threshold:0.1});
+      document.addEventListener('DOMContentLoaded',()=>{
+        document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+      });
+    </script>
+  </body>
+</html>
