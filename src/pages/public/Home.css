@@ -60,7 +60,7 @@ html, body {
   position: relative;
   overflow: hidden;
   min-height: 80vh;
-  padding: 140px 16px 80px;
+  padding: 100px 16px 80px;   /* reduce from 140px */
   background-size: 400% 400% !important;
   animation: mesh-move 15s ease infinite;
   -webkit-font-smoothing: antialiased;
@@ -1332,9 +1332,10 @@ html, body {
   background: linear-gradient(135deg, #0F172A 0%, #1E293B 40%, #1E3A8A 100%);
   position: relative;
   overflow: hidden;
-  max-width: 900px;
-  margin: 0 auto;
-  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 0;   /* remove rounded corners */
   box-shadow: 0 2px 8px rgba(30,64,175,0.04);
 }
 
