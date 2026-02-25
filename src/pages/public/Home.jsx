@@ -74,7 +74,7 @@ const Home = () => {
         {list.map((supplier) => (
           <div key={supplier.id} className="supplier-card">
             <div className="supplier-avatar-wrapper">
-              <div className="supplier-avatar">
+              <div className="supplier-avatar orange-avatar">
                 {(supplier.companyName || supplier.name || 'S').charAt(0).toUpperCase()}
               </div>
               {supplier.isVerified && (
@@ -85,9 +85,9 @@ const Home = () => {
             </div>
 
             {supplier.isVerified && (
-              <div className="supplier-verified-badge">
-                <FiShield size={12} />
-                Verified Partner
+              <div className="supplier-verified-badge authorized-blue">
+                <FiShield size={16} style={{ color: '#18181B', marginRight: 4 }} />
+                <span style={{ color: '#2563EB' }}>Authorized Partner</span>
               </div>
             )}
 
@@ -122,14 +122,7 @@ const Home = () => {
               )}
             </div>
 
-            {supplier.rating && (
-              <div className="supplier-rating">
-                <span className="supplier-stars">
-                  <FiStar size={12} /> {supplier.rating}/5
-                </span>
-                <span>({supplier.reviewCount || 0} reviews)</span>
-              </div>
-            )}
+            {/* Reviews removed as requested */}
 
             <Link to="/listings" className="supplier-card-hover-btn">
               View Profile <FiArrowRight size={12} />
