@@ -359,37 +359,34 @@ const Listings = () => {
 
                       {/* Badges */}
                       <div className="slc-badges">
-                        {supplier.isAuthorizedPartner && (
-                          <div className="slc-auth-badge" title="Authorized Partner">
-                            <FiShield size={14} />
-                            <span>Authorized Partner</span>
-                          </div>
-                        )}
-                        {supplier.isVerified && (
-                          <div className="slc-verified-dot" title="Verified Supplier">
-                            <FiCheck size={14} />
-                          </div>
-                        )}
+                        <div className="slc-auth-badge-black" title="Authorized Partner" style={{
+                          display: 'flex', alignItems: 'center', gap: 4, background: '#111', color: '#fff', borderRadius: 6, fontWeight: 500, fontSize: 13, padding: '2px 10px', marginBottom: 2
+                        }}>
+                          <FiShield size={14} style={{ color: '#fff' }} />
+                          <span>Authorized Partner</span>
+                        </div>
                       </div>
 
                       {/* Identity */}
                       <div className="slc-identity">
                         <div className="slc-name">{supplier.companyName}</div>
-                        {supplier.websiteUrl && (
-                          <a
-                            href={supplier.websiteUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="slc-website-link"
-                          >
-                            <FiExternalLink size={12} />
-                            View Website
-                          </a>
-                        )}
+                        {/* View Website button removed as requested */}
                         <div className="slc-location">
+
                           <FiMapPin size={12} />
                           <span>{supplier.location || 'Global'}</span>
                         </div>
+                        {/* Products and Industries under location */}
+                        {(supplier.products && supplier.products.length > 0) && (
+                          <div style={{ marginTop: 4, fontSize: 13, color: '#444' }}>
+                            <strong>Products:</strong> {supplier.products.map(p => typeof p === 'string' ? p : p.name).join(', ')}
+                          </div>
+                        )}
+                        {(supplier.industries && supplier.industries.length > 0) && (
+                          <div style={{ marginTop: 2, fontSize: 13, color: '#444' }}>
+                            <strong>Industries:</strong> {supplier.industries.map(i => typeof i === 'string' ? i : i.name).join(', ')}
+                          </div>
+                        )}
                       </div>
 
                       {/* Tags */}
@@ -407,32 +404,47 @@ const Listings = () => {
                             )}
                           </div>
                         )}
-                        {/* Industries */}
-                        {supplier.industries && supplier.industries.length > 0 && (
-                          <div className="slc-tag-group">
-                            {supplier.industries.slice(0, 3).map((industry, idx) => (
-                              <span key={idx} className="slc-tag slc-tag-blue">
-                                {typeof industry === 'string' ? industry : industry.name}
-                              </span>
-                            ))}
-                            {supplier.industries.length > 3 && (
-                              <span className="slc-tag slc-tag-more">+{supplier.industries.length - 3}</span>
-                            )}
-                          </div>
-                        )}
+                        {/* Industries tags removed to avoid duplicate display */}
                       </div>
                     </div>
 
                     {/* Right Section - 30% */}
                     <div className="slc-right">
-                      {/* Type Pill */}
-                      <span className="slc-type-pill">{supplier.supplierType || 'Supplier'}</span>
+                      {/* Category Pill replaces Supplier Type */}
+                      <span className="slc-type-pill">
+                        {supplier.category
+                          ? (typeof supplier.category === 'string' ? supplier.category : supplier.category.name)
+                          : (supplier.supplierType || 'Supplier')}
+                      </span>
 
                       {/* Action Buttons */}
                       <div className="slc-actions">
                         <Link to="/contact" className="slc-btn-link">
                           <button className="slc-btn">Contact</button>
                         </Link>
+                        {supplier.websiteUrl && (
+                          <a
+                            href={supplier.websiteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="slc-btn slc-btn-secondary"
+                            style={{
+                              display: 'block',
+                              margin: '10px 0 0 0',
+                              borderRadius: '22px',
+                              fontWeight: 600,
+                              fontSize: 14,
+                              padding: '8px 0',
+                              background: '#fff',
+                              color: '#222',
+                              border: '1.5px solid #1a73e8',
+                              textAlign: 'center',
+                              width: '100%'
+                            }}
+                          >
+                            View Website
+                          </a>
+                        )}
                         <Link to={`/rfq?supplier=${supplier.id}`} className="slc-btn-link">
                           <button className="slc-btn slc-btn-rfq">Submit RFQ</button>
                         </Link>

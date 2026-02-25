@@ -89,14 +89,15 @@ const Listings = () => {
         onClose={() => setIsModalOpen(false)}
         title="Add New Listing"
       >
-        <form className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-primary-text mb-1">Company Name</label>
-            <input
-              type="text"
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Enter company name"
-            />
+                          {/* Category */}
+                          {supplier.category && (
+                            <div className="slc-tag-group">
+                              <span className="slc-tag slc-tag-blue">
+                                <FiGrid size={13} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                                {typeof supplier.category === 'string' ? supplier.category : supplier.category.name}
+                              </span>
+                            </div>
+                          )}
           </div>
           <div>
             <label className="block text-sm font-medium text-primary-text mb-1">Category</label>
