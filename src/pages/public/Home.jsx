@@ -175,7 +175,8 @@ const Home = () => {
   return (
     <div className="home-page">
       {/* Hero Section */}
-      <section className="hero">
+      <section className="hero section">
+        <div className="container">
         {/* Aurora background effects */}
         <div className="hero-aurora-2"></div>
         <div className="hero-aurora-3"></div>
@@ -260,10 +261,12 @@ const Home = () => {
             </div>
           </div>
         </div>
+        </div>
       </section>
 
       {/* Categories Section */}
-      <section className="category-section">
+      <section className="category-section section">
+        <div className="container">
         <div className="category-section-header">
           <div className="section-label">EXPLORE BY INDUSTRY</div>
           <h2 className="section-title">Diverse Industries & Sectors</h2>
@@ -326,10 +329,12 @@ const Home = () => {
             </p>
           </div>
         )}
+        </div>
       </section>
 
       {/* Featured Suppliers Section */}
-      <section className="suppliers-section">
+      <section className="suppliers-section section">
+        <div className="container">
         <div className="category-section-header">
           <div className="section-label">FEATURED SUPPLIERS</div>
           <h2 className="section-title">Top-Rated, Verified Businesses</h2>
@@ -379,12 +384,14 @@ const Home = () => {
             </Link>
           </div>
         )}
+        </div>
       </section>
 
       {/* Stats Section */}
-      <section className="stats-section">
+      <section className="stats-section section">
+        <div className="container">
         <div className="stats-grid">
-          {stats.map((stat, index) => (
+          {stats.slice(0, 2).map((stat, index) => (
             <div key={index} className={`stat-card ${stat.highlight ? 'stat-card-highlight' : ''}`}>
               <div className="stat-icon-ring">
                 {stat.icon}
@@ -394,10 +401,23 @@ const Home = () => {
             </div>
           ))}
         </div>
+        <div className="stats-grid" style={{ marginTop: '24px' }}>
+          {stats.slice(2).map((stat, index) => (
+            <div key={index + 2} className={`stat-card ${stat.highlight ? 'stat-card-highlight' : ''}`}>
+              <div className="stat-icon-ring">
+                {stat.icon}
+              </div>
+              <div className="stat-number">{stat.number}</div>
+              <div className="stat-label">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+        </div>
       </section>
 
       {/* CTA Banner */}
-      <section className="cta-banner">
+      <section className="cta-banner section">
+        <div className="container">
         <div className="cta-banner-inner">
           <div className="cta-banner-orb cta-orb-1"></div>
           <div className="cta-banner-orb cta-orb-2"></div>
@@ -425,6 +445,7 @@ const Home = () => {
               </Link>
             </div>
           </div>
+        </div>
         </div>
       </section>
     </div>

@@ -307,6 +307,17 @@ const Contact = () => {
 
             <div className="rfq-table-wrapper">
               <table className="rfq-table">
+                  {/* 🔥 ADD THIS BLOCK */}
+    <colgroup>
+      <col style={{ width: "60px" }} />      {/* SR NO */}
+      <col />                                {/* DESCRIPTION */}
+      <col />                                {/* CATEGORY */}
+      <col />                                {/* MODEL */}
+      <col style={{ width: "160px" }} />     {/* QTY / UNIT */}
+      <col style={{ width: "90px" }} />      {/* ACTION */}
+    </colgroup>
+
+    
                 <thead>
                   <tr>
                     <th>SR. NO</th>
