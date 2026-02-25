@@ -31,6 +31,8 @@ export const demoSuppliers = [
     businessDescription: 'Heavy machinery and industrial equipment supplier with global reach.',
     isFeatured: true,
     isVerified: true,
+    isAuthorizedPartner: true,
+    category: { id: 'cat-1', name: 'Manufacturing' },
     rating: 4.8,
     reviewCount: 128,
     type: 'MANUFACTURER',
@@ -56,6 +58,8 @@ export const demoSuppliers = [
     businessDescription: 'OEM electronics supplier specializing in IoT and smart devices.',
     isFeatured: true,
     isVerified: true,
+    isAuthorizedPartner: false,
+    category: { id: 'cat-2', name: 'Electronics' },
     rating: 4.7,
     reviewCount: 96,
     type: 'TRADER',
@@ -70,53 +74,6 @@ export const demoSuppliers = [
     ]
   },
   {
-    id: 'sup-3',
-    companyName: 'Cresta Materials',
-    // Add products and industries as needed for this supplier
-    products: [
-      { id: 'prod-3', name: 'Industrial Solvent Pack' }
-    ],
-    industries: [
-      { id: 'ind-3', name: 'Chemicals & Materials' }
-    ],
-    name: 'Cresta Materials',
-    location: 'Mumbai, India',
-    address: 'Andheri East',
-    description: 'Bulk chemicals and raw materials for industrial production.',
-    businessDescription: 'Bulk chemicals and raw materials for industrial production.',
-    isFeatured: true,
-    isVerified: true,
-    rating: 4.6,
-    reviewCount: 74,
-    type: 'MANUFACTURER',
-    website: 'https://example.com/cresta',
-    websiteUrl: 'https://example.com/cresta',
-    industryIds: ['ind-3'],
-  },
-  {
-    id: 'sup-4',
-    companyName: 'LoomWorks Textiles',
-    name: 'LoomWorks Textiles',
-    location: 'Istanbul, Turkey',
-    address: 'Zeytinburnu',
-    description: 'Premium fabric and textile supplier for apparel brands.',
-    businessDescription: 'Premium fabric and textile supplier for apparel brands.',
-    isFeatured: false,
-    isVerified: true,
-    rating: 4.5,
-    reviewCount: 62,
-    type: 'MANUFACTURER',
-    website: 'https://example.com/loomworks',
-    websiteUrl: 'https://example.com/loomworks',
-    industryIds: ['ind-4'],
-    products: [
-      { id: 'prod-4', name: 'Premium Cotton Fabric' }
-    ],
-    industries: [
-      { id: 'ind-4', name: 'Textiles & Apparel' }
-    ]
-  },
-  {
     id: 'sup-5',
     companyName: 'Torque Auto Parts',
     name: 'Torque Auto Parts',
@@ -126,6 +83,8 @@ export const demoSuppliers = [
     businessDescription: 'Automotive components supplier with rapid fulfillment.',
     isFeatured: false,
     isVerified: true,
+    isAuthorizedPartner: true,
+    category: { id: 'cat-6', name: 'Automotive' },
     rating: 4.4,
     reviewCount: 51,
     type: 'TRADER',
@@ -149,6 +108,8 @@ export const demoSuppliers = [
     businessDescription: 'Construction materials and site-ready inventory partner.',
     isFeatured: false,
     isVerified: true,
+    isAuthorizedPartner: false,
+    category: { id: 'cat-8', name: 'Construction' },
     rating: 4.3,
     reviewCount: 39,
     type: 'CONTRACTOR',
@@ -163,6 +124,33 @@ export const demoSuppliers = [
       { id: 'ind-6', name: 'Construction & Infrastructure' }
     ]
   },
+    {
+      id: 'sup-7',
+      companyName: 'GlobalTech Solutions',
+      name: 'GlobalTech Solutions',
+      location: 'London, UK',
+      address: 'Tech Park, Canary Wharf',
+      description: 'Leading provider of advanced electronics and automation systems.',
+      businessDescription: 'Leading provider of advanced electronics and automation systems.',
+      isFeatured: true,
+      isVerified: true,
+      isAuthorizedPartner: true,
+      category: { id: 'cat-2', name: 'Electronics' },
+      rating: 4.9,
+      reviewCount: 210,
+      type: 'MANUFACTURER',
+      website: 'https://example.com/globaltech',
+      websiteUrl: 'https://example.com/globaltech',
+      industryIds: ['ind-2', 'ind-1'],
+      products: [
+        { id: 'prod-10', name: 'Smart Automation Controller' },
+        { id: 'prod-11', name: 'Industrial IoT Gateway' }
+      ],
+      industries: [
+        { id: 'ind-2', name: 'Consumer Electronics' },
+        { id: 'ind-1', name: 'Industrial Equipment' }
+      ]
+    },
 ];
 
 export const demoProducts = [

@@ -1,3 +1,25 @@
+/* ===== FIX FLOATING CART COLOR ON CLICK ===== */
+
+.products-floating-cart,
+.products-floating-cart:focus,
+.products-floating-cart:active,
+.products-floating-cart:visited {
+  background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%) !important;
+  color: #FFFFFF !important;
+  outline: none;
+  border: none;
+}
+
+/* hover stays same */
+.products-floating-cart:hover {
+  background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%);
+  color: #FFFFFF;
+}
+
+/* remove mobile tap highlight */
+.products-floating-cart {
+  -webkit-tap-highlight-color: transparent;
+}
 /* ============================================
    PRODUCTS PAGE - ADMN THEME
    Professional B2B Product Catalog

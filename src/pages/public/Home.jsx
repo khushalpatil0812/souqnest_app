@@ -196,7 +196,30 @@ const Home = () => {
           <div className="hero-orb hero-orb-3"></div>
         </div>
 
-        {/* Floating cards removed as requested */}
+        {/* Floating KPI Cards (Hero) */}
+        <div className="floating-card fc-left fade-up-delay-1">
+          <div className="icon-wrapper">📈</div>
+          <div className="card-label">Revenue Growth</div>
+          <div className="card-value">+45.2%</div>
+          <div className="card-badge">This Month</div>
+          <div className="checkmark">✓</div>
+        </div>
+
+        <div className="floating-card fc-right-top fade-up-delay-2">
+          <div className="icon-wrapper">📦</div>
+          <div className="card-label">Total Orders</div>
+          <div className="card-value">2,847</div>
+          <div className="card-badge">Active</div>
+          <div className="checkmark">✓</div>
+        </div>
+
+        <div className="floating-card fc-right-bottom fade-up-delay-3">
+          <div className="icon-wrapper">👥</div>
+          <div className="card-label">Active Users</div>
+          <div className="card-value">12.5K+</div>
+          <div className="card-badge">Online</div>
+          <div className="checkmark">✓</div>
+        </div>
 
         <div className="hero-content">
           {/* Badge */}
@@ -417,7 +440,6 @@ const Home = () => {
 
       {/* CTA Banner */}
       <section className="cta-banner section">
-        <div className="container">
         <div className="cta-banner-inner">
           <div className="cta-banner-orb cta-orb-1"></div>
           <div className="cta-banner-orb cta-orb-2"></div>
@@ -445,7 +467,6 @@ const Home = () => {
               </Link>
             </div>
           </div>
-        </div>
         </div>
       </section>
     </div>

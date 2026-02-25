@@ -1,3 +1,56 @@
+.slc-left {
+  min-width: 0;
+}
+/* ============================================
+   FIX: ACTION BUTTONS INSIDE CARD (DESKTOP)
+   ============================================ */
+
+.slc-card {
+  overflow: hidden; /* ensure content stays inside */
+}
+
+/* ensure right side stays inside card width */
+.slc-right {
+  flex: 0 0 30%;
+  max-width: 30%;
+  align-items: flex-end;
+}
+
+/* buttons container */
+.slc-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* buttons full width inside column */
+.slc-btn-link,
+.slc-btn {
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+}
+
+/* prevent overflow */
+.slc-btn {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* fix spacing so it doesn’t push outside */
+.slc-header {
+  align-items: flex-start;
+}
+/* Fix header width for odd/even supplier cards */
+.slc-header-even {
+  width: 100%;
+}
+.slc-header-odd {
+  width: 100%;
+}
 /* ============================================
    LISTINGS/SUPPLIERS PAGE - ADMN THEME
    Professional B2B Supplier Directory
@@ -630,6 +683,14 @@
   overflow: hidden;
 }
 
+@media (max-width: 768px) {
+  .slc-card {
+    padding: 12px 6px;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+}
+
 .slc-card:hover {
   border-color: #1E40AF;
   box-shadow: 0 12px 32px rgba(30, 64, 175, 0.14);
@@ -641,6 +702,13 @@
   display: flex;
   gap: 24px;
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  .slc-header {
+    flex-direction: column;
+    gap: 12px;
+  }
 }
 
 .slc-left {
@@ -656,6 +724,15 @@
   flex-direction: column;
   gap: 12px;
   align-items: flex-end;
+}
+
+@media (max-width: 768px) {
+  .slc-right {
+    flex: 1 1 auto;
+    align-items: flex-start;
+    margin-top: 8px;
+    width: 100%;
+  }
 }
 
 /* Logo Box */
@@ -818,12 +895,38 @@
   border: 1px solid #E5E7EB;
 }
 
+@media (max-width: 768px) {
+  .slc-type-pill {
+    font-size: 0.95rem;
+    padding: 7px 14px;
+    margin-bottom: 8px;
+    align-self: flex-start;
+  }
+}
+
 /* Actions */
 .slc-actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  .slc-actions {
+    flex-direction: row;
+    width: 100%;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .slc-btn-link {
+    flex: 1;
+  }
+  .slc-btn {
+    min-width: 90px;
+    font-size: 0.85rem;
+    padding: 8px 0;
+  }
 }
 
 .slc-btn-link {

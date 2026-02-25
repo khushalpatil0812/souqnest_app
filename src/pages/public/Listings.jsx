@@ -345,7 +345,7 @@ const Listings = () => {
             <div className={`suppliers-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
               {suppliers.map((supplier, index) => (
                 <div key={supplier.id} className="slc-card">
-                  <div className="slc-header">
+                  <div className={`slc-header ${index % 2 === 0 ? 'slc-header-even' : 'slc-header-odd'}`}> 
                     {/* Left Section - 70% */}
                     <div className="slc-left">
                       {/* Logo Box */}
@@ -355,16 +355,6 @@ const Listings = () => {
                         ) : (
                           <span>{supplier.companyName?.charAt(0)?.toUpperCase() || 'S'}</span>
                         )}
-                      </div>
-
-                      {/* Badges */}
-                      <div className="slc-badges">
-                        <div className="slc-auth-badge-black" title="Authorized Partner" style={{
-                          display: 'flex', alignItems: 'center', gap: 4, background: '#111', color: '#fff', borderRadius: 6, fontWeight: 500, fontSize: 13, padding: '2px 10px', marginBottom: 2
-                        }}>
-                          <FiShield size={14} style={{ color: '#fff' }} />
-                          <span>Authorized Partner</span>
-                        </div>
                       </div>
 
                       {/* Identity */}
@@ -397,12 +387,19 @@ const Listings = () => {
                     <div className="slc-right">
                       {/* Category Pill replaces Supplier Type */}
                       <span className="slc-type-pill" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {/* Authorized logo */}
-                        <FiShield size={15} style={{ color: '#1a73e8' }} />
+                        {/* Authorized Partner badge between logo and category name */}
+                        {supplier.isAuthorizedPartner && (
+                          <span className="slc-auth-badge-inline" title="Authorized Partner" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#e8f0fe', color: '#1a73e8', borderRadius: 6, fontWeight: 500, fontSize: 13, padding: '2px 8px' }}>
+                            <FiShield size={15} style={{ color: '#1a73e8' }} />
+                            <span>Authorized Partner</span>
+                          </span>
+                        )}
                         {/* Category name */}
-                        {supplier.category
-                          ? (typeof supplier.category === 'string' ? supplier.category : supplier.category.name)
-                          : 'Category'}
+                        <span style={{ marginLeft: supplier.isAuthorizedPartner ? 8 : 0 }}>
+                          {supplier.category && (supplier.category.name || typeof supplier.category === 'string')
+                            ? (supplier.category.name || supplier.category)
+                            : 'Category'}
+                        </span>
                       </span>
 
                       {/* Action Buttons */}
@@ -415,20 +412,8 @@ const Listings = () => {
                             href={supplier.websiteUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="slc-btn slc-btn-secondary"
-                            style={{
-                              display: 'block',
-                              margin: '10px 0 0 0',
-                              borderRadius: '22px',
-                              fontWeight: 600,
-                              fontSize: 14,
-                              padding: '8px 0',
-                              background: '#fff',
-                              color: '#222',
-                              border: '1.5px solid #1a73e8',
-                              textAlign: 'center',
-                              width: '100%'
-                            }}
+                            className="slc-btn slc-btn-secondary slc-btn-link"
+                            style={{ minWidth: 90, textAlign: 'center' }}
                           >
                             View Website
                           </a>
