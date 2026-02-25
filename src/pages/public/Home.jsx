@@ -202,27 +202,7 @@ const Home = () => {
           <div className="hero-orb hero-orb-3"></div>
         </div>
 
-        {/* Floating Left Card */}
-        <div className="floating-card floating-card-left">
-          <div className="floating-card-icon">⭐</div>
-          <div className="floating-card-value">4.8/5</div>
-          <div className="floating-card-label">Avg Rating</div>
-        </div>
-
-        {/* Floating Right Card */}
-        <div className="floating-card floating-card-right">
-          <div className="floating-card-icon">✓</div>
-          <div className="floating-card-value">12.5K+</div>
-          <div className="floating-card-label">Active Users</div>
-        </div>
-
-        {/* Small Right Floater */}
-        <div className="floating-card floating-card-mini floating-card-right-mid">
-          <div className="floating-card-icon">
-            <FiCheck size={16} />
-          </div>
-          <div className="floating-card-label">Order Today</div>
-        </div>
+        {/* Floating cards removed as requested */}
 
         <div className="hero-content">
           {/* Badge */}
