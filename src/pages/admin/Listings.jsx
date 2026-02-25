@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { demoProducts, demoIndustries } from '../../data/dummy';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import Table from '../../components/Table';
 import Badge from '../../components/Badge';
@@ -7,6 +8,22 @@ import Modal from '../../components/Modal';
 
 const Listings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Demo supplier mapping for product and industry
+  const demoSupplierMap = {
+    'TechManufacture Co.': {
+      products: demoProducts.filter(p => p.category.name === 'Manufacturing').map(p => p.name),
+      industries: demoIndustries.filter(i => i.name === 'Industrial Equipment').map(i => i.name)
+    },
+    'Global Chemicals Ltd.': {
+      products: demoProducts.filter(p => p.category.name === 'Chemicals').map(p => p.name),
+      industries: demoIndustries.filter(i => i.name === 'Chemicals & Materials').map(i => i.name)
+    },
+    'Asian Electronics Hub': {
+      products: demoProducts.filter(p => p.category.name === 'Electronics').map(p => p.name),
+      industries: demoIndustries.filter(i => i.name === 'Consumer Electronics').map(i => i.name)
+    }
+  };
 
   const listings = [
     { 
@@ -17,7 +34,9 @@ const Listings = () => {
       featured: true,
       verified: true,
       authorized: true,
-      date: '2026-02-10'
+      date: '2026-02-10',
+      products: demoSupplierMap['TechManufacture Co.'].products,
+      industries: demoSupplierMap['TechManufacture Co.'].industries
     },
     { 
       id: 2, 
@@ -27,7 +46,9 @@ const Listings = () => {
       featured: false,
       verified: true,
       authorized: false,
-      date: '2026-02-09'
+      date: '2026-02-09',
+      products: demoSupplierMap['Global Chemicals Ltd.'].products,
+      industries: demoSupplierMap['Global Chemicals Ltd.'].industries
     },
     { 
       id: 3, 
@@ -37,7 +58,9 @@ const Listings = () => {
       featured: true,
       verified: true,
       authorized: true,
-      date: '2026-02-08'
+      date: '2026-02-08',
+      products: demoSupplierMap['Asian Electronics Hub'].products,
+      industries: demoSupplierMap['Asian Electronics Hub'].industries
     },
   ];
 
@@ -45,6 +68,20 @@ const Listings = () => {
     { label: 'Company', key: 'company' },
     { label: 'Category', key: 'category' },
     { label: 'Location', key: 'location' },
+    {
+      label: 'Products',
+      key: 'products',
+      render: (row) => (
+        <span>{row.products && row.products.length > 0 ? row.products.join(', ') : '-'}</span>
+      )
+    },
+    {
+      label: 'Industries',
+      key: 'industries',
+      render: (row) => (
+        <span>{row.industries && row.industries.length > 0 ? row.industries.join(', ') : '-'}</span>
+      )
+    },
     { 
       label: 'Badges', 
       key: 'badges',

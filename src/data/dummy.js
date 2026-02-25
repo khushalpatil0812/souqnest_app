@@ -37,6 +37,14 @@ export const demoSuppliers = [
     website: 'https://example.com/atlas',
     websiteUrl: 'https://example.com/atlas',
     industryIds: ['ind-1', 'ind-6'],
+    products: [
+      { id: 'prod-1', name: 'Industrial Conveyor Belt' },
+      { id: 'prod-5', name: 'Precision Gear Set' }
+    ],
+    industries: [
+      { id: 'ind-1', name: 'Industrial Equipment' },
+      { id: 'ind-6', name: 'Construction & Infrastructure' }
+    ]
   },
   {
     id: 'sup-2',
@@ -54,10 +62,23 @@ export const demoSuppliers = [
     website: 'https://example.com/nova',
     websiteUrl: 'https://example.com/nova',
     industryIds: ['ind-2'],
+    products: [
+      { id: 'prod-2', name: 'Smart IoT Sensor Kit' }
+    ],
+    industries: [
+      { id: 'ind-2', name: 'Consumer Electronics' }
+    ]
   },
   {
     id: 'sup-3',
     companyName: 'Cresta Materials',
+    // Add products and industries as needed for this supplier
+    products: [
+      { id: 'prod-3', name: 'Industrial Solvent Pack' }
+    ],
+    industries: [
+      { id: 'ind-3', name: 'Chemicals & Materials' }
+    ],
     name: 'Cresta Materials',
     location: 'Mumbai, India',
     address: 'Andheri East',
@@ -88,6 +109,12 @@ export const demoSuppliers = [
     website: 'https://example.com/loomworks',
     websiteUrl: 'https://example.com/loomworks',
     industryIds: ['ind-4'],
+    products: [
+      { id: 'prod-4', name: 'Premium Cotton Fabric' }
+    ],
+    industries: [
+      { id: 'ind-4', name: 'Textiles & Apparel' }
+    ]
   },
   {
     id: 'sup-5',
@@ -105,6 +132,12 @@ export const demoSuppliers = [
     website: 'https://example.com/torque',
     websiteUrl: 'https://example.com/torque',
     industryIds: ['ind-5'],
+    products: [
+      { id: 'prod-6', name: 'Alloy Brake Discs' }
+    ],
+    industries: [
+      { id: 'ind-5', name: 'Automotive & Parts' }
+    ]
   },
   {
     id: 'sup-6',
@@ -122,6 +155,13 @@ export const demoSuppliers = [
     website: 'https://example.com/buildcore',
     websiteUrl: 'https://example.com/buildcore',
     industryIds: ['ind-6'],
+    products: [
+      { id: 'prod-7', name: 'Construction Steel Beams' },
+      { id: 'prod-8', name: 'Food Grade Packaging' }
+    ],
+    industries: [
+      { id: 'ind-6', name: 'Construction & Infrastructure' }
+    ]
   },
 ];
 

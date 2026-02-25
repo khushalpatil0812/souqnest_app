@@ -390,31 +390,19 @@ const Listings = () => {
                       </div>
 
                       {/* Tags */}
-                      <div className="slc-tags">
-                        {/* Products */}
-                        {supplier.products && supplier.products.length > 0 && (
-                          <div className="slc-tag-group">
-                            {supplier.products.slice(0, 3).map((product, idx) => (
-                              <span key={idx} className="slc-tag slc-tag-blue">
-                                {typeof product === 'string' ? product : product.name}
-                              </span>
-                            ))}
-                            {supplier.products.length > 3 && (
-                              <span className="slc-tag slc-tag-more">+{supplier.products.length - 3}</span>
-                            )}
-                          </div>
-                        )}
-                        {/* Industries tags removed to avoid duplicate display */}
-                      </div>
+                      {/* Product tags removed as requested */}
                     </div>
 
                     {/* Right Section - 30% */}
                     <div className="slc-right">
                       {/* Category Pill replaces Supplier Type */}
-                      <span className="slc-type-pill">
+                      <span className="slc-type-pill" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {/* Authorized logo */}
+                        <FiShield size={15} style={{ color: '#1a73e8' }} />
+                        {/* Category name */}
                         {supplier.category
                           ? (typeof supplier.category === 'string' ? supplier.category : supplier.category.name)
-                          : (supplier.supplierType || 'Supplier')}
+                          : 'Category'}
                       </span>
 
                       {/* Action Buttons */}
