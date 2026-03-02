@@ -101,6 +101,8 @@ const ProductModal = ({ productSlug, onClose }) => {
                     <img 
                       src={allImages[currentImageIndex]} 
                       alt={product.name}
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
                       }}
@@ -133,7 +135,7 @@ const ProductModal = ({ productSlug, onClose }) => {
                         className={`thumbnail ${idx === currentImageIndex ? 'active' : ''}`}
                         onClick={() => setCurrentImageIndex(idx)}
                       >
-                        <img src={img} alt={`${product.name} ${idx + 1}`} />
+                        <img src={img} alt={`${product.name} ${idx + 1}`} loading="lazy" decoding="async" />
                       </button>
                     ))}
                   </div>

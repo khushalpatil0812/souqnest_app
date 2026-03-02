@@ -30,7 +30,7 @@ const RFQForm = () => {
   const [productSearch, setProductSearch] = useState('');
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [emailError, setEmailError] = useState('');
-  const [focusedField, setFocusedField] = useState(null);
+  const [showValidation, setShowValidation] = useState(false);
 
   // Cart items
   const [cartItems, setCartItems] = useState([]);
@@ -58,10 +58,11 @@ const RFQForm = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await productApi.getAll();
-        setProducts(res.data || res || []);
+        const res = await productApi.getAll({ isActive: true });
+        const allProducts = res.data || res || [];
+        setProducts(allProducts.filter(p => p.isActive !== false));
       } catch (err) {
-        console.error('Failed to fetch products:', err);
+        // Silently handle product fetch error
       }
     };
     fetchProducts();
@@ -146,16 +147,27 @@ const RFQForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const fieldErrors = {
+    companyName: showValidation && !formData.companyName.trim() ? 'Company name is required.' : '',
+    contactName: showValidation && !formData.contactName.trim() ? 'Contact person is required.' : '',
+    email: showValidation && !formData.email.trim() ? 'Corporate email is required.' : emailError,
+    phone: showValidation && !formData.phone.trim() ? 'Phone number is required.' : '',
+  };
+
   const canProceedToStep2 = cartItems.length > 0;
   const canProceedToStep3 = formData.companyName && formData.contactName && formData.email && formData.phone && !emailError;
 
   const handleNextStep = () => {
     if (currentStep === 1 && canProceedToStep2) {
+      setShowValidation(false);
       setCurrentStep(2);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (currentStep === 2 && canProceedToStep3) {
+      setShowValidation(false);
       setCurrentStep(3);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (currentStep === 2) {
+      setShowValidation(true);
     }
   };
 
@@ -212,7 +224,6 @@ const RFQForm = () => {
       });
       setCurrentStep(1);
     } catch (error) {
-      console.error('RFQ submission error:', error);
       setSubmissionStatus('error');
     }
   };
@@ -310,10 +321,21 @@ const RFQForm = () => {
               <React.Fragment key={step.id}>
                 <div 
                   className={`rfq-step ${currentStep === step.id ? 'active' : ''} ${currentStep > step.id ? 'completed' : ''}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-current={currentStep === step.id ? 'step' : undefined}
                   onClick={() => {
                     if (step.id < currentStep) setCurrentStep(step.id);
                     else if (step.id === 2 && canProceedToStep2) setCurrentStep(2);
                     else if (step.id === 3 && canProceedToStep3) setCurrentStep(3);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      if (step.id < currentStep) setCurrentStep(step.id);
+                      else if (step.id === 2 && canProceedToStep2) setCurrentStep(2);
+                      else if (step.id === 3 && canProceedToStep3) setCurrentStep(3);
+                    }
                   }}
                 >
                   <div className="rfq-step-indicator">
@@ -385,7 +407,7 @@ const RFQForm = () => {
                         >
                           <div className="rfq-product-option-img">
                             {product.imageUrl ? (
-                              <img src={product.imageUrl} alt={product.name} />
+                              <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" />
                             ) : (
                               <FiPackage size={20} />
                             )}
@@ -423,7 +445,7 @@ const RFQForm = () => {
                       <div key={item.productId} className="rfq-cart-item">
                         <div className="rfq-cart-item-img">
                           {item.imageUrl ? (
-                            <img src={item.imageUrl} alt={item.productName} />
+                            <img src={item.imageUrl} alt={item.productName} loading="lazy" decoding="async" />
                           ) : (
                             <FiPackage size={20} />
                           )}
@@ -481,8 +503,7 @@ const RFQForm = () => {
               )}
 
               {/* Step Actions */}
-              <div className="rfq-form-actions">
-                <div></div>
+              <div className="rfq-form-actions rfq-form-actions-end">
                 <button
                   type="button"
                   className="rfq-btn rfq-btn-primary"
@@ -490,7 +511,7 @@ const RFQForm = () => {
                   onClick={handleNextStep}
                 >
                   Continue to Details
-                  <FiChevronDown className="rfq-btn-icon-right" style={{ transform: 'rotate(-90deg)' }} />
+                  <FiChevronDown className="rfq-btn-icon-right rfq-btn-icon-next" />
                 </button>
               </div>
             </div>
@@ -515,106 +536,133 @@ const RFQForm = () => {
                 <span>Please use your corporate email address. Personal emails (Gmail, Yahoo, etc.) are not accepted for business inquiries.</span>
               </div>
 
-              <div className="rfq-form-grid">
-                {/* Company Name */}
-                <div className={`rfq-field ${focusedField === 'companyName' || formData.companyName ? 'focused' : ''}`}>
-                  <FiBriefcase className="rfq-field-icon" size={18} />
-                  <input
-                    type="text"
-                    id="companyName"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    onFocus={() => setFocusedField('companyName')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    autoComplete="organization"
-                  />
-                  <label htmlFor="companyName">Company Name *</label>
+              <div className="rfq-required-note" role="note" aria-live="polite">
+                <span className="rfq-required-star" aria-hidden="true">*</span> Required fields
+              </div>
+
+              {showValidation && !canProceedToStep3 && (
+                <div className="rfq-validation-summary" role="alert" aria-live="assertive">
+                  <FiAlertCircle size={16} />
+                  <span>Please complete all required fields with valid details to continue.</span>
+                </div>
+              )}
+
+              <div className="rfq-form-grid" role="group" aria-label="Company and contact details">
+                <div className={`rfq-field-group ${fieldErrors.companyName ? 'error' : ''}`}>
+                  <label htmlFor="companyName" className="rfq-field-label">
+                    Company Name <span className="rfq-required-star" aria-hidden="true">*</span>
+                  </label>
+                  <div className="rfq-input-wrap">
+                    <FiBriefcase className="rfq-field-icon" size={18} />
+                    <input
+                      type="text"
+                      id="companyName"
+                      name="companyName"
+                      value={formData.companyName}
+                      onChange={handleChange}
+                      required
+                      autoComplete="organization"
+                      aria-required="true"
+                      aria-invalid={Boolean(fieldErrors.companyName)}
+                      aria-describedby={fieldErrors.companyName ? 'companyName-error' : undefined}
+                    />
+                  </div>
+                  {fieldErrors.companyName && <span id="companyName-error" className="rfq-field-error">{fieldErrors.companyName}</span>}
                 </div>
 
-                {/* Contact Name */}
-                <div className={`rfq-field ${focusedField === 'contactName' || formData.contactName ? 'focused' : ''}`}>
-                  <FiUser className="rfq-field-icon" size={18} />
-                  <input
-                    type="text"
-                    id="contactName"
-                    name="contactName"
-                    value={formData.contactName}
-                    onChange={handleChange}
-                    onFocus={() => setFocusedField('contactName')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    autoComplete="name"
-                  />
-                  <label htmlFor="contactName">Contact Person *</label>
+                <div className={`rfq-field-group ${fieldErrors.contactName ? 'error' : ''}`}>
+                  <label htmlFor="contactName" className="rfq-field-label">
+                    Contact Person <span className="rfq-required-star" aria-hidden="true">*</span>
+                  </label>
+                  <div className="rfq-input-wrap">
+                    <FiUser className="rfq-field-icon" size={18} />
+                    <input
+                      type="text"
+                      id="contactName"
+                      name="contactName"
+                      value={formData.contactName}
+                      onChange={handleChange}
+                      required
+                      autoComplete="name"
+                      aria-required="true"
+                      aria-invalid={Boolean(fieldErrors.contactName)}
+                      aria-describedby={fieldErrors.contactName ? 'contactName-error' : undefined}
+                    />
+                  </div>
+                  {fieldErrors.contactName && <span id="contactName-error" className="rfq-field-error">{fieldErrors.contactName}</span>}
                 </div>
 
-                {/* Email */}
-                <div className={`rfq-field ${focusedField === 'email' || formData.email ? 'focused' : ''} ${emailError ? 'error' : ''}`}>
-                  <FiMail className="rfq-field-icon" size={18} />
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleEmailChange}
-                    onFocus={() => setFocusedField('email')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    autoComplete="email"
-                  />
-                  <label htmlFor="email">Corporate Email *</label>
-                  {emailError && <span className="rfq-field-error">{emailError}</span>}
+                <div className={`rfq-field-group ${fieldErrors.email ? 'error' : ''}`}>
+                  <label htmlFor="email" className="rfq-field-label">
+                    Corporate Email <span className="rfq-required-star" aria-hidden="true">*</span>
+                  </label>
+                  <div className="rfq-input-wrap">
+                    <FiMail className="rfq-field-icon" size={18} />
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleEmailChange}
+                      required
+                      autoComplete="email"
+                      aria-required="true"
+                      aria-invalid={Boolean(fieldErrors.email)}
+                      aria-describedby={fieldErrors.email ? 'email-error' : undefined}
+                    />
+                  </div>
+                  {fieldErrors.email && <span id="email-error" className="rfq-field-error">{fieldErrors.email}</span>}
                 </div>
 
-                {/* Phone */}
-                <div className={`rfq-field ${focusedField === 'phone' || formData.phone ? 'focused' : ''}`}>
-                  <FiPhone className="rfq-field-icon" size={18} />
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    onFocus={() => setFocusedField('phone')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    autoComplete="tel"
-                    placeholder=""
-                  />
-                  <label htmlFor="phone">Phone Number *</label>
+                <div className={`rfq-field-group ${fieldErrors.phone ? 'error' : ''}`}>
+                  <label htmlFor="phone" className="rfq-field-label">
+                    Phone Number <span className="rfq-required-star" aria-hidden="true">*</span>
+                  </label>
+                  <div className="rfq-input-wrap">
+                    <FiPhone className="rfq-field-icon" size={18} />
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      autoComplete="tel"
+                      aria-required="true"
+                      aria-invalid={Boolean(fieldErrors.phone)}
+                      aria-describedby={fieldErrors.phone ? 'phone-error' : undefined}
+                    />
+                  </div>
+                  {fieldErrors.phone && <span id="phone-error" className="rfq-field-error">{fieldErrors.phone}</span>}
                 </div>
 
-                {/* Country */}
-                <div className={`rfq-field rfq-field-full ${focusedField === 'country' || formData.country ? 'focused' : ''}`}>
-                  <FiGlobe className="rfq-field-icon" size={18} />
-                  <input
-                    type="text"
-                    id="country"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleChange}
-                    onFocus={() => setFocusedField('country')}
-                    onBlur={() => setFocusedField(null)}
-                    autoComplete="country-name"
-                  />
-                  <label htmlFor="country">Country / Region</label>
+                <div className="rfq-field-group rfq-field-full">
+                  <label htmlFor="country" className="rfq-field-label">Country / Region</label>
+                  <div className="rfq-input-wrap">
+                    <FiGlobe className="rfq-field-icon" size={18} />
+                    <input
+                      type="text"
+                      id="country"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      autoComplete="country-name"
+                    />
+                  </div>
                 </div>
 
-                {/* Message */}
-                <div className={`rfq-field rfq-field-full rfq-field-textarea ${focusedField === 'message' || formData.message ? 'focused' : ''}`}>
-                  <FiMessageSquare className="rfq-field-icon" size={18} />
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    onFocus={() => setFocusedField('message')}
-                    onBlur={() => setFocusedField(null)}
-                    rows="4"
-                  ></textarea>
-                  <label htmlFor="message">Additional Requirements</label>
+                <div className="rfq-field-group rfq-field-full rfq-field-textarea">
+                  <label htmlFor="message" className="rfq-field-label">Additional Requirements</label>
+                  <div className="rfq-input-wrap">
+                    <FiMessageSquare className="rfq-field-icon" size={18} />
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      rows="4"
+                    ></textarea>
+                  </div>
                 </div>
               </div>
 
@@ -625,7 +673,7 @@ const RFQForm = () => {
                   className="rfq-btn rfq-btn-secondary"
                   onClick={handlePrevStep}
                 >
-                  <FiChevronDown className="rfq-btn-icon-left" style={{ transform: 'rotate(90deg)' }} />
+                  <FiChevronDown className="rfq-btn-icon-left rfq-btn-icon-prev" />
                   Back
                 </button>
                 <button
@@ -635,7 +683,7 @@ const RFQForm = () => {
                   onClick={handleNextStep}
                 >
                   Review & Submit
-                  <FiChevronDown className="rfq-btn-icon-right" style={{ transform: 'rotate(-90deg)' }} />
+                  <FiChevronDown className="rfq-btn-icon-right rfq-btn-icon-next" />
                 </button>
               </div>
             </div>
@@ -726,7 +774,7 @@ const RFQForm = () => {
                   className="rfq-btn rfq-btn-secondary"
                   onClick={handlePrevStep}
                 >
-                  <FiChevronDown className="rfq-btn-icon-left" style={{ transform: 'rotate(90deg)' }} />
+                  <FiChevronDown className="rfq-btn-icon-left rfq-btn-icon-prev" />
                   Back
                 </button>
                 <button

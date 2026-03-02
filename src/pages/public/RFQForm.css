@@ -761,39 +761,55 @@
 .rfq-form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 20px 18px;
+}
+
+.rfq-required-note {
+  margin-bottom: 18px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #64748B;
+}
+
+.rfq-required-star {
+  color: #DC2626;
+  font-weight: 700;
+  margin-right: 2px;
 }
 
 /* ====== FORM FIELD ====== */
-.rfq-field {
+.rfq-field-group {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .rfq-field-full {
   grid-column: 1 / -1;
 }
 
+.rfq-field-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.rfq-input-wrap {
+  position: relative;
+}
+
 .rfq-field-icon {
   position: absolute;
   left: 14px;
-  top: 17px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #94A3B8;
   pointer-events: none;
   transition: color 0.2s;
   z-index: 1;
-}
-
-.rfq-field label {
-  position: absolute;
-  left: 44px;
-  top: 16px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  color: #64748B;
-  pointer-events: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  background: transparent;
-  padding: 0 4px;
 }
 
 .rfq-field input,
@@ -810,24 +826,34 @@
   transition: all 0.2s;
 }
 
+.rfq-input-wrap input,
+.rfq-input-wrap textarea {
+  width: 100%;
+  padding: 13px 14px 13px 44px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #0F172A;
+  background: #FFFFFF;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
 .rfq-field input:focus,
 .rfq-field textarea:focus {
   border-color: #1E40AF;
   box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
-.rfq-field.focused label,
-.rfq-field input:focus + label {
-  top: -9px;
-  left: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #1E40AF;
+.rfq-input-wrap input:focus,
+.rfq-input-wrap textarea:focus {
+  border-color: #1E40AF;
   background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
-.rfq-field.focused .rfq-field-icon,
-.rfq-field input:focus ~ .rfq-field-icon {
+.rfq-input-wrap:focus-within .rfq-field-icon {
   color: #1E40AF;
 }
 
@@ -835,37 +861,33 @@
   min-height: 120px;
   resize: vertical;
   line-height: 1.6;
+  padding-top: 14px;
 }
 
-.rfq-field-textarea label {
-  top: 16px;
-}
-
-.rfq-field-textarea.focused label {
-  top: -9px;
+.rfq-field-textarea .rfq-field-icon {
+  top: 18px;
+  transform: none;
 }
 
 /* Field Error State */
-.rfq-field.error input {
+.rfq-field-group.error .rfq-input-wrap input,
+.rfq-field-group.error .rfq-input-wrap textarea {
   border-color: #DC2626;
   background: #FEF2F2;
 }
 
-.rfq-field.error .rfq-field-icon {
-  color: #DC2626;
-}
-
-.rfq-field.error label {
+.rfq-field-group.error .rfq-field-icon,
+.rfq-field-group.error .rfq-field-label {
   color: #DC2626;
 }
 
 .rfq-field-error {
-  position: absolute;
-  bottom: -20px;
-  left: 0;
+  display: block;
   font-family: 'DM Sans', sans-serif;
   font-size: 12px;
+  font-weight: 500;
   color: #DC2626;
+  margin-top: 2px;
 }
 
 /* ====== FORM ACTIONS ====== */
@@ -876,6 +898,11 @@
   margin-top: 32px;
   padding-top: 24px;
   border-top: 1px solid #F1F5F9;
+  gap: 12px;
+}
+
+.rfq-form-actions-end {
+  justify-content: flex-end;
 }
 
 /* ====== BUTTONS ====== */
@@ -939,6 +966,14 @@
 
 .rfq-btn-icon-right {
   margin-left: -4px;
+}
+
+.rfq-btn-icon-prev {
+  transform: rotate(90deg);
+}
+
+.rfq-btn-icon-next {
+  transform: rotate(-90deg);
 }
 
 .rfq-btn-spinner {
@@ -1082,6 +1117,21 @@
   text-decoration: underline;
 }
 
+.rfq-validation-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #B91C1C;
+}
+
 /* ====== TRUST BADGES ====== */
 .rfq-trust {
   display: flex;
@@ -1155,10 +1205,20 @@
   .rfq-form-actions {
     flex-direction: column-reverse;
     gap: 12px;
+    align-items: stretch;
   }
 
   .rfq-form-actions .rfq-btn {
     width: 100%;
+  }
+
+  .rfq-form-actions-end {
+    justify-content: stretch;
+  }
+
+  .rfq-input-wrap input,
+  .rfq-input-wrap textarea {
+    font-size: 16px;
   }
 
   .rfq-review-details {
@@ -1206,6 +1266,22 @@
   
   .rfq-form-card {
     padding: 20px 16px;
+  }
+
+  .rfq-form-header h2 {
+    font-size: 20px;
+  }
+
+  .rfq-field-label {
+    font-size: 12px;
+  }
+
+  .rfq-required-note {
+    font-size: 12px;
+  }
+
+  .rfq-validation-summary {
+    font-size: 12px;
   }
   
   .rfq-cart-items {

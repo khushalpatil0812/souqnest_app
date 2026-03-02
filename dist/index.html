@@ -5,13 +5,30 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SouqNest - B2B Industrial Marketplace</title>
-    <script type="module" crossorigin src="/assets/index-CDJVr2wI.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <script type="module" crossorigin src="/assets/index-C2_Frxwu.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-react-DbHp_wuh.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-query-Bcn4Fvtg.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-icons-BV48wJe3.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-UW1gth-X.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-CYSnGwp2.css">
   </head>
   <body>
+    <div id="scroll-bar"></div>
     <div id="root"></div>
+    <script>
+      window.addEventListener('scroll',()=>{
+        const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+        const bar=document.getElementById('scroll-bar');
+        if(bar) bar.style.width=pct+'%';
+        const nav=document.querySelector('nav') || document.querySelector('.navbar');
+        if(nav) nav.style.boxShadow=window.scrollY>60 ? '0 4px 20px rgba(0,0,0,0.1)' : 'var(--shadow-soft)';
+      });
+      const observer=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+      },{threshold:0.1});
+      document.addEventListener('DOMContentLoaded',()=>{
+        document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+      });
+    </script>
   </body>
 </html>

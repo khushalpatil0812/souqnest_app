@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiUpload, FiSearch, FiRefreshCw, FiBriefcase } from 'react-icons/fi';
 import Table from '../../components/Table';
 import Badge from '../../components/Badge';
 import Button from '../../components/Button';
 import Modal from '../../components/Modal';
-import SupplierBulkUpload from './SupplierBulkUpload';
 import { supplierApi, industryApi, extractArray } from '../../services/api';
+
+const SupplierBulkUpload = lazy(() => import('./SupplierBulkUpload'));
 
 const Suppliers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -79,10 +80,10 @@ const Suppliers = () => {
   };
 
   // Filter suppliers
-  const filteredSuppliers = suppliers.filter(s =>
+  const filteredSuppliers = useMemo(() => suppliers.filter(s =>
     s.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (s.description && s.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ), [suppliers, searchTerm]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -500,11 +501,15 @@ const Suppliers = () => {
       </Modal>
 
       {/* Bulk Upload Modal */}
-      <SupplierBulkUpload
-        isOpen={isBulkUploadOpen}
-        onClose={() => setIsBulkUploadOpen(false)}
-        onSuccess={() => fetchSuppliers()}
-      />
+      {isBulkUploadOpen && (
+        <Suspense fallback={null}>
+          <SupplierBulkUpload
+            isOpen={isBulkUploadOpen}
+            onClose={() => setIsBulkUploadOpen(false)}
+            onSuccess={() => fetchSuppliers()}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

@@ -92,7 +92,7 @@ const CartDrawer = () => {
                 <div key={item.id} className="cart-item">
                   <div className="cart-item-image">
                     {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.name} />
+                      <img src={item.imageUrl} alt={item.name} loading="lazy" decoding="async" />
                     ) : (
                       <div className="cart-item-no-image">
                         <FiShoppingCart size={24} />

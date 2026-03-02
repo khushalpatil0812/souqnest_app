@@ -173,6 +173,7 @@ export const productApi = {
 export const categoryApi = {
   getAll: (params) => apiClient.get('/categories', { params }),
   getTree: () => apiClient.get('/categories/tree'),
+  getById: (id) => apiClient.get(`/categories/${id}`),
   create: (data) => apiClient.post('/categories', data),
   update: (id, data) => apiClient.patch(`/categories/${id}`, data),
   delete: (id) => apiClient.delete(`/categories/${id}`),

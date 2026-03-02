@@ -1,30 +1,23 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { 
-  FiSearch, 
-  FiFilter, 
-  FiGrid, 
-  FiList, 
-  FiPackage,
-  FiTag,
-  FiChevronLeft,
-  FiChevronRight,
-  FiEye,
-  FiShoppingCart,
-  FiCheck,
-  FiX
-} from 'react-icons/fi';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { FiShoppingCart } from 'react-icons/fi';
 import { useProductsWithPagination } from '../../hooks/useProducts';
 import { useCategories } from '../../hooks/useCategories';
 import { useIndustries } from '../../hooks/useIndustries';
 import { useCart } from '../../context/CartContext';
-import ProductModal from '../../components/ProductModal';
-import CartDrawer from '../../components/CartDrawer';
+import PageSection from '../../components/shared/PageSection';
+import ProductsHeroSection from '../../components/products/ProductsHeroSection';
+import ProductsFilterSection from '../../components/products/ProductsFilterSection';
+import ProductsListingSection from '../../components/products/ProductsListingSection';
+import PaginationSection from '../../components/products/PaginationSection';
 import './Products.css';
+
+const ProductModal = lazy(() => import('../../components/ProductModal'));
+const CartDrawer = lazy(() => import('../../components/CartDrawer'));
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { cart, addToCart, removeFromCart, getCartCount, openCart } = useCart();
+  const { cart, isCartOpen, addToCart, removeFromCart, getCartCount, openCart } = useCart();
   
   // State
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
@@ -49,6 +42,7 @@ const Products = () => {
       page: currentPage,
       limit: ITEMS_PER_PAGE,
       sort: sortBy,
+      isActive: true,
     };
     if (searchTerm) params.search = searchTerm;
     if (selectedCategory) params.categoryId = selectedCategory;
@@ -66,9 +60,17 @@ const Products = () => {
   const { data: categories = [] } = useCategories();
   const { data: industries = [] } = useIndustries();
 
-  // Extract products and meta
-  const products = productsResponse?.data || [];
-  const meta = productsResponse?.meta || { total: 0, page: 1, limit: ITEMS_PER_PAGE, totalPages: 1 };
+  // Extract products and meta — filter to only active products (safety net if backend doesn't filter)
+  const allProducts = productsResponse?.data || [];
+  const products = allProducts.filter(p => p.isActive !== false);
+  const rawMeta = productsResponse?.meta || { total: 0, page: 1, limit: ITEMS_PER_PAGE, totalPages: 1 };
+  // Adjust meta counts to reflect only active products
+  const activeTotal = rawMeta.total ? rawMeta.total - (allProducts.length - products.length) : products.length;
+  const meta = {
+    ...rawMeta,
+    total: Math.max(0, activeTotal),
+    totalPages: Math.max(1, Math.ceil(Math.max(0, activeTotal) / ITEMS_PER_PAGE)),
+  };
 
   // Update URL when filters change
   useEffect(() => {
@@ -166,442 +168,159 @@ const Products = () => {
     return `${symbol}${price.amount?.toLocaleString()}`;
   };
 
-  // Generate pagination
-  const generatePaginationPages = () => {
+  const paginationPages = useMemo(() => {
     const pages = [];
     const totalPages = meta.totalPages;
-    
+
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else if (currentPage <= 3) {
+      pages.push(1, 2, 3, 4, '...', totalPages);
+    } else if (currentPage >= totalPages - 2) {
+      pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
     } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, '...', totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-      } else {
-        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
-      }
+      pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
     }
+
     return pages;
-  };
+  }, [meta.totalPages, currentPage]);
 
   // Check if any filter is active
   const hasActiveFilters = selectedCategory || selectedIndustry || selectedCurrency || minPrice || maxPrice;
 
+  const activeFilters = useMemo(() => {
+    const items = [];
+
+    if (selectedCategory) {
+      items.push({
+        key: 'category',
+        label: categories.find(c => c.id === selectedCategory)?.name || 'Category',
+        onRemove: () => setSelectedCategory(''),
+      });
+    }
+
+    if (selectedIndustry) {
+      items.push({
+        key: 'industry',
+        label: industries.find(i => i.id === selectedIndustry)?.name || 'Industry',
+        onRemove: () => setSelectedIndustry(''),
+      });
+    }
+
+    if (selectedCurrency && (minPrice || maxPrice)) {
+      items.push({
+        key: 'price',
+        label: `${selectedCurrency}: ${minPrice || '0'} - ${maxPrice || '∞'}`,
+        onRemove: () => {
+          setSelectedCurrency('');
+          setMinPrice('');
+          setMaxPrice('');
+        },
+      });
+    }
+
+    return items;
+  }, [selectedCategory, selectedIndustry, selectedCurrency, minPrice, maxPrice, categories, industries]);
+
   return (
     <div className="products-page">
-      {/* Hero Section */}
-      <section className="products-hero">
-        <div className="products-hero-content">
-          <nav className="products-breadcrumb">
-            <Link to="/">Home</Link> / <span>Products</span>
-          </nav>
-          
-          <h1 className="products-hero-title">
-            Explore Our <span>Products</span>
-          </h1>
-          
-          <p className="products-hero-subtitle">
-            Browse through our extensive catalog of quality B2B products.
-            Find what you need from verified suppliers.
-          </p>
+      <PageSection
+        as="section"
+        sectionClassName="products-hero products-hero-section"
+        containerClassName="products-hero-content"
+        aria-labelledby="products-hero-title"
+      >
+        <ProductsHeroSection
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onSearchSubmit={handleSearchSubmit}
+          productsCount={meta.total || products.length}
+          categoriesCount={categories.length}
+          industriesCount={industries.length}
+        />
+      </PageSection>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="products-search-bar">
-            <FiSearch size={22} className="products-search-icon" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search products by name or description..."
-            />
-            <button type="submit" className="products-search-btn">
-              Search Products
-            </button>
-          </form>
+      <PageSection
+        as="section"
+        sectionClassName="products-list-section"
+        containerClassName="products-content"
+        aria-label="Products listing section"
+      >
+        <ProductsFilterSection
+          showFilters={showFilters}
+          onToggleFilters={() => setShowFilters(!showFilters)}
+          hasActiveFilters={Boolean(hasActiveFilters)}
+          onClearFilters={handleClearFilters}
+          categories={categories}
+          industries={industries}
+          selectedCategory={selectedCategory}
+          selectedIndustry={selectedIndustry}
+          selectedCurrency={selectedCurrency}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          onCategoryChange={handleCategoryChange}
+          onIndustryChange={handleIndustryChange}
+          onCurrencyChange={(value) => {
+            setSelectedCurrency(value);
+            if (!value) {
+              setMinPrice('');
+              setMaxPrice('');
+            }
+            handleFilterChange();
+          }}
+          onMinPriceChange={(value) => {
+            setMinPrice(value);
+            handleFilterChange();
+          }}
+          onMaxPriceChange={(value) => {
+            setMaxPrice(value);
+            handleFilterChange();
+          }}
+          onApplyFilters={() => setShowFilters(false)}
+        />
 
-          {/* Quick Stats */}
-          <div className="products-quick-stats">
-            <div className="quick-stat">
-              <span className="quick-stat-value">{meta.total || products.length}+</span>
-              <span className="quick-stat-label">Products</span>
-            </div>
-            <div className="quick-stat">
-              <span className="quick-stat-value">{categories.length}+</span>
-              <span className="quick-stat-label">Categories</span>
-            </div>
-            <div className="quick-stat">
-              <span className="quick-stat-value">{industries.length}+</span>
-              <span className="quick-stat-label">Industries</span>
-            </div>
-          </div>
-        </div>
-      </section>
+        <main className="products-main" aria-live="polite">
+          <ProductsListingSection
+            isLoading={isLoading}
+            error={error}
+            products={products}
+            meta={meta}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+            activeFilters={activeFilters}
+            onProductClick={handleProductClick}
+            onOrderClick={handleOrderClick}
+            isInCart={isInCart}
+            formatPrice={formatPrice}
+            onClearFilters={handleClearFilters}
+            emptyMessage={
+              searchTerm || hasActiveFilters
+                ? 'Try adjusting your search or filters to find more products.'
+                : 'Check back soon for new products!'
+            }
+          />
 
-      {/* Main Content */}
-      <div className="products-content">
-        {/* Mobile Filter Toggle */}
-        <button 
-          className="products-mobile-filter-toggle"
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          <FiFilter size={18} />
-          {showFilters ? 'Hide Filters' : 'Show Filters'}
-        </button>
-
-        {/* Filter Sidebar */}
-        <aside className={`products-sidebar ${showFilters ? 'open' : ''}`}>
-          <div className="products-filter-card">
-            <div className="products-filter-header">
-              <h2 className="products-filter-title">
-                <FiFilter size={18} /> Filters
-              </h2>
-              {hasActiveFilters && (
-                <button className="products-filter-clear" onClick={handleClearFilters}>
-                  Clear All
-                </button>
-              )}
-            </div>
-
-            {/* Category Filter */}
-            <div className="products-filter-group">
-              <label className="products-filter-label">Category</label>
-              <select
-                className="products-filter-select"
-                value={selectedCategory}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-              >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Industry Filter */}
-            <div className="products-filter-group">
-              <label className="products-filter-label">Industry</label>
-              <select
-                className="products-filter-select"
-                value={selectedIndustry}
-                onChange={(e) => handleIndustryChange(e.target.value)}
-              >
-                <option value="">All Industries</option>
-                {industries.map((industry) => (
-                  <option key={industry.id} value={industry.id}>
-                    {industry.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Price Range */}
-            <div className="products-filter-group">
-              <label className="products-filter-label">Price Range</label>
-              <select
-                className="products-filter-select"
-                value={selectedCurrency}
-                onChange={(e) => {
-                  setSelectedCurrency(e.target.value);
-                  if (!e.target.value) {
-                    setMinPrice('');
-                    setMaxPrice('');
-                  }
-                  handleFilterChange();
-                }}
-              >
-                <option value="">Select Currency</option>
-                <option value="INR">₹ INR</option>
-                <option value="SAR">ر.س SAR</option>
-              </select>
-              
-              {selectedCurrency && (
-                <div className="products-price-inputs">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={minPrice}
-                    onChange={(e) => {
-                      setMinPrice(e.target.value);
-                      handleFilterChange();
-                    }}
-                    className="products-price-input"
-                  />
-                  <span className="products-price-separator">to</span>
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={maxPrice}
-                    onChange={(e) => {
-                      setMaxPrice(e.target.value);
-                      handleFilterChange();
-                    }}
-                    className="products-price-input"
-                  />
-                </div>
-              )}
-            </div>
-
-            <button 
-              className="products-apply-btn"
-              onClick={() => setShowFilters(false)}
-            >
-              Apply Filters
-            </button>
-          </div>
-        </aside>
-
-        {/* Main Products Area */}
-        <main className="products-main">
-          {/* Toolbar */}
-          <div className="products-toolbar">
-            <p className="products-results-count">
-              {isLoading ? (
-                'Loading products...'
-              ) : (
-                <>Showing <strong>{products.length}</strong> of <strong>{meta.total}</strong> products</>
-              )}
-            </p>
-            
-            <div className="products-view-options">
-              <button 
-                className={`products-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
-                title="Grid View"
-              >
-                <FiGrid size={18} />
-              </button>
-              <button 
-                className={`products-view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
-                title="List View"
-              >
-                <FiList size={18} />
-              </button>
-              
-              <select 
-                className="products-sort-select"
-                value={sortBy}
-                onChange={(e) => handleSortChange(e.target.value)}
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="a-z">Name (A-Z)</option>
-                <option value="z-a">Name (Z-A)</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Active Filters Tags */}
-          {hasActiveFilters && (
-            <div className="products-active-filters">
-              {selectedCategory && (
-                <span className="active-filter-tag">
-                  {categories.find(c => c.id === selectedCategory)?.name || 'Category'}
-                  <button onClick={() => setSelectedCategory('')}><FiX size={14} /></button>
-                </span>
-              )}
-              {selectedIndustry && (
-                <span className="active-filter-tag">
-                  {industries.find(i => i.id === selectedIndustry)?.name || 'Industry'}
-                  <button onClick={() => setSelectedIndustry('')}><FiX size={14} /></button>
-                </span>
-              )}
-              {selectedCurrency && (minPrice || maxPrice) && (
-                <span className="active-filter-tag">
-                  {selectedCurrency}: {minPrice || '0'} - {maxPrice || '∞'}
-                  <button onClick={() => {
-                    setSelectedCurrency('');
-                    setMinPrice('');
-                    setMaxPrice('');
-                  }}><FiX size={14} /></button>
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Error State */}
-          {error && (
-            <div className="products-empty-state">
-              <div className="products-empty-icon">⚠️</div>
-              <h3 className="products-empty-title">Unable to Load Products</h3>
-              <p className="products-empty-text">
-                {error?.response?.data?.message || 'Please try again later.'}
-              </p>
-            </div>
-          )}
-
-          {/* Loading State */}
-          {isLoading && (
-            <div className={`products-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="product-card-skeleton">
-                  <div className="skeleton-image"></div>
-                  <div className="skeleton-content">
-                    <div className="skeleton-tag"></div>
-                    <div className="skeleton-title"></div>
-                    <div className="skeleton-price"></div>
-                    <div className="skeleton-actions"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!isLoading && !error && products.length === 0 && (
-            <div className="products-empty-state">
-              <div className="products-empty-icon">📦</div>
-              <h3 className="products-empty-title">No Products Found</h3>
-              <p className="products-empty-text">
-                {searchTerm || hasActiveFilters
-                  ? 'Try adjusting your search or filters to find more products.'
-                  : 'Check back soon for new products!'}
-              </p>
-              {hasActiveFilters && (
-                <button className="products-clear-btn" onClick={handleClearFilters}>
-                  Clear All Filters
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Products Grid */}
-          {!isLoading && !error && products.length > 0 && (
-            <div className={`products-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
-              {products.map((product) => (
-                <article 
-                  key={product.id} 
-                  className="product-card"
-                  onClick={() => handleProductClick(product.slug)}
-                >
-                  {/* Product Image */}
-                  <div className="product-card-image">
-                    {product.imageUrl ? (
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name}
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/300x300?text=No+Image';
-                        }}
-                      />
-                    ) : (
-                      <div className="product-card-no-image">
-                        <FiPackage size={40} />
-                      </div>
-                    )}
-                    
-                    {/* Quick View Overlay */}
-                    <div className="product-card-overlay">
-                      <span className="product-quick-view">
-                        <FiEye size={20} />
-                        Quick View
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Product Content */}
-                  <div className="product-card-content">
-                    {/* Category Tag */}
-                    {product.category && (
-                      <span className="product-card-category">
-                        <FiTag size={12} />
-                        {product.category.name}
-                      </span>
-                    )}
-
-                    {/* Product Name */}
-                    <h3 className="product-card-name">{product.name}</h3>
-
-                    {/* Overview */}
-                    <p className="product-card-overview">
-                      {product.overview?.slice(0, 80)}
-                      {product.overview?.length > 80 ? '...' : ''}
-                    </p>
-
-                    {/* Price */}
-                    {product.prices?.length > 0 && (
-                      <div className="product-card-price">
-                        <span className="price-from">From</span>
-                        <span className="price-amount">{formatPrice(product.prices)}</span>
-                      </div>
-                    )}
-
-                    {/* Actions */}
-                    <div className="product-card-actions">
-                      <button 
-                        className="product-card-btn view"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProductClick(product.slug);
-                        }}
-                      >
-                        <FiEye size={16} /> View
-                      </button>
-                      <button 
-                        className={`product-card-btn order ${isInCart(product.id) ? 'in-cart' : ''}`}
-                        onClick={(e) => handleOrderClick(e, product)}
-                      >
-                        {isInCart(product.id) ? (
-                          <><FiCheck size={16} /> Added</>
-                        ) : (
-                          <><FiShoppingCart size={16} /> Order</>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-
-          {/* Pagination */}
-          {!isLoading && products.length > 0 && meta.totalPages > 1 && (
-            <nav className="products-pagination">
-              <button 
-                className="products-page-btn" 
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              >
-                <FiChevronLeft size={18} />
-              </button>
-              
-              {generatePaginationPages().map((page, idx) => (
-                page === '...' ? (
-                  <span key={`ellipsis-${idx}`} className="products-page-ellipsis">...</span>
-                ) : (
-                  <button 
-                    key={page}
-                    className={`products-page-btn ${currentPage === page ? 'active' : ''}`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </button>
-                )
-              ))}
-              
-              <button 
-                className="products-page-btn"
-                disabled={currentPage === meta.totalPages}
-                onClick={() => setCurrentPage(prev => Math.min(meta.totalPages, prev + 1))}
-              >
-                <FiChevronRight size={18} />
-              </button>
-            </nav>
-          )}
+          <PaginationSection
+            isLoading={isLoading}
+            hasItems={products.length > 0}
+            totalPages={meta.totalPages}
+            currentPage={currentPage}
+            pages={paginationPages}
+            onPageChange={setCurrentPage}
+          />
         </main>
-      </div>
+      </PageSection>
 
       {/* Product Modal */}
       {selectedProductSlug && (
-        <ProductModal 
-          productSlug={selectedProductSlug} 
-          onClose={handleCloseModal} 
-        />
+        <Suspense fallback={null}>
+          <ProductModal 
+            productSlug={selectedProductSlug} 
+            onClose={handleCloseModal} 
+          />
+        </Suspense>
       )}
 
       {/* Floating Cart Button */}
@@ -614,7 +333,11 @@ const Products = () => {
       )}
 
       {/* Cart Drawer */}
-      <CartDrawer />
+      {(isCartOpen || getCartCount() > 0) && (
+        <Suspense fallback={null}>
+          <CartDrawer />
+        </Suspense>
+      )}
     </div>
   );
 };

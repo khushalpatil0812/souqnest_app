@@ -126,7 +126,6 @@ const Contact = () => {
       });
       setAttachments([]);
     } catch (err) {
-      console.error('Contact submission error:', err);
       setError(err.response?.data?.message || 'Failed to submit. Please try again.');
     } finally {
       setSubmitting(false);

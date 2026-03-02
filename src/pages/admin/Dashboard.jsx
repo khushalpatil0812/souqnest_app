@@ -43,35 +43,59 @@ const Dashboard = () => {
       ]);
 
       // Extract metrics (object) - handles { data: {...} } or flat object
+      console.log('Dashboard metrics raw:', metricsRes);
       setMetrics(extractObject(metricsRes, {}));
       
-      // Extract arrays
-      setProductPopularity(extractArray(popularityRes));
+      // Extract product popularity - handle various response shapes
+      console.log('Product popularity raw:', popularityRes);
+      let popData = extractArray(popularityRes);
+      // If the response was an object with a nested key we didn't match, try all keys
+      if (popData.length === 0 && popularityRes && typeof popularityRes === 'object') {
+        const allKeys = Object.keys(popularityRes);
+        for (const key of allKeys) {
+          if (Array.isArray(popularityRes[key])) {
+            popData = popularityRes[key];
+            break;
+          }
+        }
+      }
+      setProductPopularity(popData);
 
       // RFQ analytics is an object with pending/responded counts
+      console.log('RFQ analytics raw:', analyticsRes);
       setRfqAnalytics(extractObject(analyticsRes, {}));
 
       // Extract list data - no limit param so we get all items for counting
+      console.log('Suppliers raw:', suppliersRes);
+      console.log('Products raw:', productsRes);
+      console.log('Categories raw:', categoriesRes);
+      console.log('Industries raw:', industriesRes);
+      console.log('RFQs raw:', rfqsRes);
+
       const allRfqs = extractArray(rfqsRes);
       const allSuppliers = extractArray(suppliersRes);
       const allProducts = extractArray(productsRes);
       const allCategories = extractArray(categoriesRes);
       const allIndustries = extractArray(industriesRes);
 
+      console.log('Extracted - suppliers:', allSuppliers.length, 'products:', allProducts.length, 'categories:', allCategories.length, 'industries:', allIndustries.length, 'rfqs:', allRfqs.length);
+
       setRecentRFQs(allRfqs.slice(0, 5));
       setRecentSuppliers(allSuppliers.slice(0, 5));
       setCategories(allCategories);
       setIndustries(allIndustries);
       
-      // Store full counts for fallback metrics
+      // Store full counts for fallback metrics (always fresh from API lists)
       setFallbackCounts({
         suppliers: allSuppliers.length,
         products: allProducts.length,
+        activeProducts: allProducts.filter(p => p.isActive === true || p.isActive === 'true').length,
+        inactiveProducts: allProducts.filter(p => p.isActive === false || p.isActive === 'false' || !p.isActive).length,
         rfqs: allRfqs.length,
         categories: allCategories.length,
         industries: allIndustries.length,
-        pendingRfqs: allRfqs.filter(r => r.status === 'PENDING').length,
-        respondedRfqs: allRfqs.filter(r => r.status === 'RESPONDED').length,
+        pendingRfqs: allRfqs.filter(r => r.status === 'PENDING' || r.status === 'pending').length,
+        respondedRfqs: allRfqs.filter(r => r.status === 'RESPONDED' || r.status === 'responded').length,
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -290,34 +314,46 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Product Popularity */}
+        {/* Product Status Overview */}
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200/60 p-6">
           <div className="flex items-center gap-2 mb-4">
-            <FiTrendingUp className="text-emerald-600" size={20} />
-            <h2 className="text-lg font-bold text-neutral-900">Top Products</h2>
+            <FiPackage className="text-emerald-600" size={20} />
+            <h2 className="text-lg font-bold text-neutral-900">Product Status</h2>
           </div>
-          {productPopularity.length > 0 ? (
-            <div className="space-y-3">
-              {productPopularity.slice(0, 5).map((item, idx) => {
-                // Handle various backend response shapes for product name
-                const productName = item.name || item.productName || item.Product?.name || item.product?.name || 'Unknown';
-                // Handle various count field names
-                const requestCount = item.requestCount || item.request_count || item.count || item.rfqCount || item.totalQuantity || item.total_quantity || item.views || 0;
-                return (
-                  <div key={item.productId || item.id || idx} className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-b-0">
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold text-neutral-400 w-6">#{idx + 1}</span>
-                      <span className="font-medium text-neutral-900 text-sm">{productName}</span>
-                    </div>
-                    <Badge variant="default">{requestCount} requests</Badge>
+          {(fallbackCounts.products > 0) ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-emerald-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-emerald-700">
+                    {fallbackCounts.activeProducts || 0}
                   </div>
-                );
-              })}
+                  <div className="text-sm text-emerald-600">Active Products</div>
+                </div>
+                <div className="bg-orange-50 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-orange-700">
+                    {fallbackCounts.inactiveProducts || 0}
+                  </div>
+                  <div className="text-sm text-orange-600">Inactive Products</div>
+                </div>
+              </div>
+              <div className="text-sm text-neutral-500">
+                Total: {fallbackCounts.products} products
+              </div>
+              {/* Progress bar */}
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-emerald-500 h-2.5 rounded-full transition-all"
+                  style={{ width: `${fallbackCounts.products > 0 ? ((fallbackCounts.activeProducts || 0) / fallbackCounts.products * 100) : 0}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-neutral-400 text-right">
+                {fallbackCounts.products > 0 ? Math.round(((fallbackCounts.activeProducts || 0) / fallbackCounts.products) * 100) : 0}% active
+              </p>
             </div>
           ) : (
             <div className="text-center py-8 text-neutral-400">
-              <FiTrendingUp className="mx-auto mb-2" size={32} />
-              <p className="text-sm">No popularity data yet</p>
+              <FiPackage className="mx-auto mb-2" size={32} />
+              <p className="text-sm">No products yet</p>
             </div>
           )}
         </div>

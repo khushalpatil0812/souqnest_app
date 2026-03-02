@@ -264,6 +264,7 @@ const Categories = () => {
       slug: category.slug,
       description: category.description || '',
       icon: category.icon || '',
+      imageUrl: category.imageUrl || '',
       parentId: category.parentId || null,
     });
     setIsModalOpen(true);

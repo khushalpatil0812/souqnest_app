@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { FiUpload, FiDownload, FiX, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import Button from '../../components/Button';
 import Modal from '../../components/Modal';
+import templateFile from '../../assets/files/Template bulk suppliers upload.xlsx?url';
 import { supplierApi } from '../../services/api';
 
 const SupplierBulkUpload = ({ isOpen, onClose, onSuccess }) => {
@@ -12,7 +13,7 @@ const SupplierBulkUpload = ({ isOpen, onClose, onSuccess }) => {
   const fileInputRef = useRef(null);
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-  const ALLOWED_EXTENSIONS = ['.xlsx', '.csv'];
+  const ALLOWED_EXTENSIONS = ['.xlsx'];
 
   // Reset form state
   const resetForm = () => {
@@ -38,7 +39,7 @@ const SupplierBulkUpload = ({ isOpen, onClose, onSuccess }) => {
 
     const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
     if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
-      return 'Invalid file type. Only .xlsx and .csv files are allowed';
+      return 'Invalid file type. Only .xlsx (Excel) files are allowed';
     }
 
     if (file.size > MAX_FILE_SIZE) {
@@ -161,25 +162,12 @@ const SupplierBulkUpload = ({ isOpen, onClose, onSuccess }) => {
     }
   };
 
-  // Download CSV template
+  // Download Excel template (static file from assets)
   const handleDownloadTemplate = () => {
-    const csvContent = 'companyName,websiteUrl,supplierType,description,logoUrl,isFeatured,isAuthorizedPartner,isVerified\n' +
-      'ABC Engineering,https://abc.com,MANUFACTURER,Industrial panels manufacturer,,TRUE,FALSE,TRUE\n' +
-      'XYZ Traders,https://xyz.com,TRADER,Electronic components trader,,FALSE,TRUE,TRUE\n' +
-      'Tech Services Ltd,https://techservices.com,SERVICE_PROVIDER,IT consulting services,,FALSE,FALSE,FALSE';
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'supplier_bulk_upload_template.csv');
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
+    link.href = templateFile;
+    link.download = 'supplier_bulk_upload_template.xlsx';
     link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -190,7 +178,7 @@ const SupplierBulkUpload = ({ isOpen, onClose, onSuccess }) => {
           <h4 className="font-semibold text-blue-900 mb-2">Upload Instructions:</h4>
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
             <li>Download the template and fill in supplier details</li>
-            <li>Only .xlsx and .csv files are accepted (use exact column names)</li>
+            <li>Only .xlsx (Excel) files are accepted (use exact column names)</li>
             <li>Maximum file size: 5MB</li>
             <li>Maximum records: 100 per upload</li>
             <li><strong>Required:</strong> companyName, supplierType</li>
@@ -214,7 +202,7 @@ const SupplierBulkUpload = ({ isOpen, onClose, onSuccess }) => {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".xlsx,.csv"
+              accept=".xlsx"
               onChange={handleFileChange}
               className="hidden"
               id="file-upload"
@@ -229,7 +217,7 @@ const SupplierBulkUpload = ({ isOpen, onClose, onSuccess }) => {
                 {selectedFile ? selectedFile.name : 'Click to select or drag and drop'}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                .xlsx or .csv (max 5MB)
+                .xlsx only (max 5MB)
               </p>
             </label>
           </div>

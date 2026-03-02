@@ -34,7 +34,8 @@ const ProductDetail = () => {
   const { data: relatedProducts = [] } = useProducts({
     categoryId: product?.category?.id,
     limit: 4,
-    exclude: id
+    exclude: id,
+    isActive: true
   });
 
   // Loading state
@@ -143,6 +144,8 @@ const ProductDetail = () => {
                   <img 
                     src={allImages[selectedImageIndex]} 
                     alt={product.name}
+                    fetchPriority="high"
+                    decoding="async"
                     onError={(e) => {
                       e.target.src = 'https://via.placeholder.com/600x600?text=No+Image';
                     }}
@@ -179,7 +182,7 @@ const ProductDetail = () => {
                       className={`thumbnail-btn ${idx === selectedImageIndex ? 'active' : ''}`}
                       onClick={() => setSelectedImageIndex(idx)}
                     >
-                      <img src={img} alt={`${product.name} ${idx + 1}`} />
+                      <img src={img} alt={`${product.name} ${idx + 1}`} loading="lazy" decoding="async" />
                     </button>
                   ))}
                 </div>
@@ -394,7 +397,7 @@ const ProductDetail = () => {
                 >
                   <div className="related-product-image">
                     {relatedProduct.imageUrl ? (
-                      <img src={relatedProduct.imageUrl} alt={relatedProduct.name} />
+                      <img src={relatedProduct.imageUrl} alt={relatedProduct.name} loading="lazy" decoding="async" />
                     ) : (
                       <div className="related-no-image">
                         <FiPackage size={32} />
@@ -434,6 +437,8 @@ const ProductDetail = () => {
                 src={allImages[selectedImageIndex]} 
                 alt={product.name}
                 className="modal-image"
+                loading="lazy"
+                decoding="async"
               />
             )}
             

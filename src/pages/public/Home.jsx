@@ -1,97 +1,71 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiUsers, FiGlobe, FiTrendingUp, FiAward, FiArrowRight, FiArrowLeft, FiCheck, FiShoppingCart, FiSearch, FiMapPin, FiStar, FiPackage, FiExternalLink, FiShield, FiZap, FiLayers } from 'react-icons/fi';
+import { FiUsers, FiGlobe, FiTrendingUp, FiAward, FiArrowRight, FiArrowLeft, FiCheck, FiSearch, FiMapPin, FiPackage, FiExternalLink, FiShield, FiZap, FiLayers } from 'react-icons/fi';
 import { useCategories } from '../../hooks/useCategories';
 import { useSuppliers } from '../../hooks/useSuppliers';
 import { useProducts } from '../../hooks/useProducts';
-import { useIndustries } from '../../hooks/useIndustries';
-import { supplierApi, extractArray } from '../../services/api';
+import { useSupplierEnrichment } from '../../hooks/useSupplierEnrichment';
 import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const suppliersScrollRef = useRef(null);
-  const [suppliersWithIndustries, setSuppliersWithIndustries] = useState([]);
   
   // Navbar scroll shrink effect
   useEffect(() => {
-    const handleScroll = () => {
-      const nav = document.querySelector('nav');
-      if (!nav) return;
-      if (window.scrollY > 50) {
-        nav.style.height = '56px';
+    const nav = document.querySelector('nav');
+    const navInner = document.querySelector('.nav-inner');
+    if (!nav && !navInner) return undefined;
+
+    let ticking = false;
+
+    const updateNav = () => {
+      const isCompact = window.scrollY > 50;
+      if (nav) {
+        nav.style.height = isCompact ? '56px' : '68px';
         nav.style.transition = 'all 0.3s ease';
-      } else {
-        nav.style.height = '68px';
       }
-      const navInner = document.querySelector('.nav-inner');
       if (navInner) {
-        navInner.style.height = window.scrollY > 50 ? '56px' : '68px';
+        navInner.style.height = isCompact ? '56px' : '68px';
+      }
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateNav);
+        ticking = true;
       }
     };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    updateNav();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
   
   // Fetch real data using React Query hooks
   const { data: categories = [], isLoading: categoriesLoading } = useCategories();
   const { data: suppliers = [], isLoading: suppliersLoading } = useSuppliers();
   const { data: products = [], isLoading: productsLoading } = useProducts();
-  const { data: industries = [], isLoading: industriesLoading } = useIndustries();
 
-  // Enrich suppliers with industries for homepage cards
-  useEffect(() => {
-    if (!suppliers || suppliers.length === 0) {
-      setSuppliersWithIndustries([]);
-      return;
-    }
+  // Use custom hook to enrich suppliers with industries (consolidated from both Home & Listings)
+  const { suppliers: suppliersSource = [] } = useSupplierEnrichment(suppliers);
 
-    let cancelled = false;
-
-    const loadIndustries = async () => {
-      try {
-        const enriched = await Promise.all(
-          suppliers.map(async (supplier) => {
-            try {
-              const res = await supplierApi.getIndustries(supplier.id);
-              const supplierIndustries = extractArray(res);
-              return { ...supplier, industries: supplierIndustries };
-            } catch {
-              return { ...supplier, industries: supplier.industries || [] };
-            }
-          })
-        );
-        if (!cancelled) {
-          setSuppliersWithIndustries(enriched);
-        }
-      } catch {
-        if (!cancelled) {
-          setSuppliersWithIndustries(suppliers);
-        }
-      }
-    };
-
-    loadIndustries();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [suppliers]);
-
-  const suppliersSource = suppliersWithIndustries.length ? suppliersWithIndustries : suppliers;
-
-  // Get featured products (limit to 6 for homepage)
-  const featuredProducts = products.slice(0, 6);
+  // Get featured products (limit to 6 for homepage) - only active products
+  const featuredProducts = useMemo(
+    () => products.filter((p) => p.isActive !== false).slice(0, 6),
+    [products]
+  );
   
-  // Get featured industries (limit to 4 for homepage)
-  const featuredIndustries = industries.slice(0, 4);
-
   // Get featured suppliers (limit to 3 for homepage)
-  const featuredSuppliers = suppliersSource
-    .filter(supplier => supplier.isFeatured)
-    .slice(0, 3);
+  const featuredSuppliers = useMemo(
+    () => suppliersSource.filter((supplier) => supplier.isFeatured).slice(0, 3),
+    [suppliersSource]
+  );
 
   const scrollSuppliers = (direction) => {
     const scrollAmount = 300;
@@ -123,6 +97,8 @@ const Home = () => {
                     src={supplier.logoUrl || supplier.logo}
                     alt={supplier.companyName || supplier.name}
                     className="supplier-logo"
+                    loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   (supplier.companyName || supplier.name || 'S').charAt(0).toUpperCase()
@@ -204,14 +180,6 @@ const Home = () => {
       </button>
     </div>
   );
-
-  // Dynamic stats based on real data
-  const stats = [
-    { number: `${suppliers.length}+`, label: 'Verified Suppliers', icon: <FiUsers size={28} />, highlight: true },
-    { number: '5+', label: 'Countries', icon: <FiGlobe size={28} /> },
-    { number: '10k+', label: 'Products', icon: <FiTrendingUp size={28} /> },
-    { number: '100%', label: 'Verified', icon: <FiAward size={28} /> },
-  ];
 
   // Handle search functionality
   const handleSearch = (e) => {
@@ -378,181 +346,197 @@ const Home = () => {
       </section>
 
       {/* Categories Section */}
-      <section className="category-section section">
-        <div className="container">
-        <div className="category-section-header">
-          <div className="section-label">EXPLORE BY INDUSTRY</div>
-          <h2 className="section-title">Diverse Industries & Sectors</h2>
-          <p className="section-subtitle">Discover suppliers across every major sector — from manufacturing to tech.</p>
-        </div>
-        
-        {/* Loading State */}
-        {categoriesLoading && (
-          <div className="marquee-wrapper">
-            <div className="marquee-row marquee-row-1">
-              {[...Array(8)].map((_, index) => (
-                <div key={index} className="category-card skeleton" style={{ minWidth: '200px', height: '60px' }}></div>
+      <section className="category-section section home-section-block">
+        <div className="container home-section-container">
+          <div className="category-section-header">
+            <div className="section-label">EXPLORE BY INDUSTRY</div>
+            <h2 className="section-title">Diverse Industries & Sectors</h2>
+            <p className="section-subtitle">Discover suppliers across every major sector — from manufacturing to tech.</p>
+          </div>
+
+          {categoriesLoading && (
+            <div className="categories-static-grid">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="category-card category-card-static skeleton"></div>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Categories Static Grid */}
-        {!categoriesLoading && categories.length > 0 && (
-          <div className="categories-static-grid">
-            {categories.slice(0, 6).map((category) => (
-              <Link key={category.id} to={`/listings?category=${category.id}`}>
-                <div className="category-card category-card-static" style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center'}}>
-                  <div className="category-icon">
-                    {getCategoryIcon(category)}
+          {!categoriesLoading && categories.length > 0 && (
+            <div className="categories-static-grid">
+              {categories.slice(0, 6).map((category) => (
+                <Link key={category.id} to={`/listings?category=${category.id}`} className="category-link">
+                  <div className="category-card category-card-static category-card-centered">
+                    <div className="category-icon">
+                      {getCategoryIcon(category)}
+                    </div>
+                    <div className="category-name">{category.name}</div>
+                    {category.supplierCount && (
+                      <div className="category-count">{category.supplierCount} suppliers</div>
+                    )}
                   </div>
-                  <div className="category-name" style={{marginTop:'10px', fontSize:'1.08rem', fontWeight:700}}>{category.name}</div>
-                  {category.supplierCount && (
-                    <div className="category-count" style={{fontSize:'0.95rem', fontWeight:600}}>{category.supplierCount} suppliers</div>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* See All Categories Button */}
-        {!categoriesLoading && categories.length > 0 && (
-          <div className="categories-see-all-wrapper">
-            <Link to="/listings">
-              <button className="btn-see-all-categories">
-                See All Categories
-                <FiArrowRight size={16} />
-              </button>
-            </Link>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!categoriesLoading && categories.length === 0 && (
-          <div className="text-center" style={{ padding: '60px 0', color: '#94A3B8' }}>
-            <div style={{ fontSize: '64px', marginBottom: '24px' }}>🏢</div>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#0F172A', marginBottom: '12px' }}>
-              No Categories Yet
-            </h3>
-            <p style={{ fontSize: '16px', color: '#475569' }}>
-              Categories are being updated. Please check back soon.
-            </p>
-          </div>
-        )}
-        </div>
-      </section>
-
-      {/* Featured Suppliers Section */}
-      <section className="suppliers-section section">
-        <div className="container">
-        <div className="category-section-header">
-          <div className="section-label">FEATURED SUPPLIERS</div>
-          <h2 className="section-title">Top-Rated, Verified Businesses</h2>
-          <p className="section-subtitle">Handpicked partners with proven track records and quality assurance.</p>
-        </div>
-
-        {/* Loading State */}
-        {suppliersLoading && (
-          <div className="suppliers-carousel">
-            <div className="suppliers-scroll">
-              {[...Array(3)].map((_, index) => (
-                <div key={index} className="supplier-card skeleton" style={{ minHeight: '220px' }}></div>
+                </Link>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Suppliers Carousel */}
-        {!suppliersLoading && featuredSuppliers.length > 0 &&
-          renderSuppliersCarousel(featuredSuppliers, false)
-        }
+          {!categoriesLoading && categories.length > 0 && (
+            <div className="categories-see-all-wrapper">
+              <Link to="/listings">
+                <button className="btn-see-all-categories">
+                  See All Categories
+                  <FiArrowRight size={16} />
+                </button>
+              </Link>
+            </div>
+          )}
 
-        {/* No Featured Suppliers - Show Regular Suppliers */}
-        {!suppliersLoading && featuredSuppliers.length === 0 && suppliers.length > 0 && (
-          renderSuppliersCarousel(suppliersSource.slice(0, 3), true)
-        )}
-
-        {/* Empty State */}
-        {!suppliersLoading && suppliers.length === 0 && (
-          <div className="empty-state">
-            <div className="empty-state-icon">🏢</div>
-            <h3 className="empty-state-title">No Suppliers Available</h3>
-            <p className="empty-state-desc">Our supplier network is being updated. Please check back soon.</p>
-            <Link to="/contact">
-              <button className="btn-primary">Become Our First Partner</button>
-            </Link>
-          </div>
-        )}
-
-        {/* View All Suppliers */}
-        {!suppliersLoading && suppliers.length > 3 && (
-          <div className="section-cta-center">
-            <Link to="/listings">
-              <button className="btn-secondary">
-                View All {suppliers.length} Suppliers <FiArrowRight size={16} />
-              </button>
-            </Link>
-          </div>
-        )}
+          {!categoriesLoading && categories.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon">🏢</div>
+              <h3 className="empty-state-title">No Categories Yet</h3>
+              <p className="empty-state-desc">Categories are being updated. Please check back soon.</p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="stats-section section">
-        <div className="container">
-        <div className="stats-grid">
-          {stats.slice(0, 2).map((stat, index) => (
-            <div key={index} className={`stat-card ${stat.highlight ? 'stat-card-highlight' : ''}`}>
-              <div className="stat-icon-ring">
-                {stat.icon}
-              </div>
-              <div className="stat-number">{stat.number}</div>
-              <div className="stat-label">{stat.label}</div>
+      {/* Featured Products Section */}
+      <section className="featured-products-section section home-section-block">
+        <div className="container home-section-container">
+          <div className="category-section-header">
+            <div className="section-label">FEATURED PRODUCTS</div>
+            <h2 className="section-title">Curated High-Demand Products</h2>
+            <p className="section-subtitle">Explore top products from trusted suppliers, selected for quality and relevance.</p>
+          </div>
+
+          {productsLoading && (
+            <div className="home-featured-products-grid">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="home-product-card skeleton"></div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="stats-grid" style={{ marginTop: '24px' }}>
-          {stats.slice(2).map((stat, index) => (
-            <div key={index + 2} className={`stat-card ${stat.highlight ? 'stat-card-highlight' : ''}`}>
-              <div className="stat-icon-ring">
-                {stat.icon}
-              </div>
-              <div className="stat-number">{stat.number}</div>
-              <div className="stat-label">{stat.label}</div>
+          )}
+
+          {!productsLoading && featuredProducts.length > 0 && (
+            <div className="home-featured-products-grid">
+              {featuredProducts.map((product) => (
+                <Link key={product.id} to={`/products/${product.slug}`} className="home-product-link">
+                  <article className="home-product-card">
+                    <div className="home-product-image-wrap">
+                      {product.imageUrl ? (
+                        <img src={product.imageUrl} alt={product.name} className="home-product-image" loading="lazy" decoding="async" />
+                      ) : (
+                        <div className="home-product-image home-product-image-fallback">
+                          <FiPackage size={24} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="home-product-content">
+                      <p className="home-product-category">{product.category?.name || 'General'}</p>
+                      <h3 className="home-product-name">{product.name}</h3>
+                      <p className="home-product-overview">
+                        {(product.overview || 'Quality product from verified supplier.').slice(0, 95)}
+                        {(product.overview || '').length > 95 ? '...' : ''}
+                      </p>
+                      <div className="home-product-cta">
+                        <span>View Details</span>
+                        <FiArrowRight size={14} />
+                      </div>
+                    </div>
+                  </article>
+                </Link>
+              ))}
             </div>
-          ))}
+          )}
+
+          {!productsLoading && featuredProducts.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon">📦</div>
+              <h3 className="empty-state-title">No Featured Products Yet</h3>
+              <p className="empty-state-desc">Products are being updated. Please check back soon.</p>
+            </div>
+          )}
         </div>
+      </section>
+
+      {/* Suppliers Section */}
+      <section className="suppliers-section section home-section-block">
+        <div className="container home-section-container">
+          <div className="category-section-header">
+            <div className="section-label">FEATURED SUPPLIERS</div>
+            <h2 className="section-title">Top-Rated, Verified Businesses</h2>
+            <p className="section-subtitle">Handpicked partners with proven track records and quality assurance.</p>
+          </div>
+
+          {suppliersLoading && (
+            <div className="suppliers-carousel">
+              <div className="suppliers-scroll">
+                {[...Array(3)].map((_, index) => (
+                  <div key={index} className="supplier-card skeleton"></div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!suppliersLoading && featuredSuppliers.length > 0 && renderSuppliersCarousel(featuredSuppliers, false)}
+
+          {!suppliersLoading && featuredSuppliers.length === 0 && suppliers.length > 0 && (
+            renderSuppliersCarousel(suppliersSource.slice(0, 3), true)
+          )}
+
+          {!suppliersLoading && suppliers.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon">🏢</div>
+              <h3 className="empty-state-title">No Suppliers Available</h3>
+              <p className="empty-state-desc">Our supplier network is being updated. Please check back soon.</p>
+              <Link to="/contact">
+                <button className="btn-primary">Become Our First Partner</button>
+              </Link>
+            </div>
+          )}
+
+          {!suppliersLoading && suppliers.length > 3 && (
+            <div className="section-cta-center">
+              <Link to="/listings">
+                <button className="btn-secondary">
+                  View All {suppliers.length} Suppliers <FiArrowRight size={16} />
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
       {/* CTA Banner */}
-      <section className="cta-banner section">
-        <div className="cta-banner-inner">
-          <div className="cta-banner-orb cta-orb-1"></div>
-          <div className="cta-banner-orb cta-orb-2"></div>
-          <div className="cta-banner-content">
-            <div className="cta-badge">
-              <FiZap size={14} />
-              Ready to get started?
-            </div>
-            <h2 className="cta-banner-title">
-              Start Procuring Better, Today.
-            </h2>
-            <p className="cta-banner-sub">
-              Join hundreds of businesses already sourcing smarter with ADMN.
-            </p>
-            <div className="cta-banner-buttons">
-              <Link to="/contact">
-                <button className="btn-primary btn-lg">
-                  Contact Us <FiArrowRight size={16} />
-                </button>
-              </Link>
-              <Link to="/rfq">
-                <button className="btn-ghost btn-lg">
-                  Submit RFQ
-                </button>
-              </Link>
+      <section className="cta-banner section home-section-block">
+        <div className="container home-section-container">
+          <div className="cta-banner-inner">
+            <div className="cta-banner-orb cta-orb-1"></div>
+            <div className="cta-banner-orb cta-orb-2"></div>
+            <div className="cta-banner-content">
+              <div className="cta-badge">
+                <FiZap size={14} />
+                Ready to get started?
+              </div>
+              <h2 className="cta-banner-title">
+                Start Procuring Better, Today.
+              </h2>
+              <p className="cta-banner-sub">
+                Join hundreds of businesses already sourcing smarter with ADMN.
+              </p>
+              <div className="cta-banner-buttons">
+                <Link to="/contact">
+                  <button className="btn-primary btn-lg">
+                    Contact Us <FiArrowRight size={16} />
+                  </button>
+                </Link>
+                <Link to="/rfq">
+                  <button className="btn-ghost btn-lg">
+                    Submit RFQ
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

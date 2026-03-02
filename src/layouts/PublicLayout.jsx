@@ -5,9 +5,9 @@ import Footer from '../components/Footer';
 
 const PublicLayout = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="public-layout-shell">
       <Navbar />
-      <main className="flex-1">
+      <main className="public-layout-main">
         <Outlet />
       </main>
       <Footer />

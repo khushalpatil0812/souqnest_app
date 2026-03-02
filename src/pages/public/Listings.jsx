@@ -21,7 +21,7 @@ import {
 import { useSuppliersWithPagination } from '../../hooks/useSuppliers';
 import { useCategories } from '../../hooks/useCategories';
 import { useIndustries } from '../../hooks/useIndustries';
-import { supplierApi, extractArray } from '../../services/api';
+import { useSupplierEnrichment } from '../../hooks/useSupplierEnrichment';
 import './Listings.css';
 
 const Listings = () => {
@@ -34,7 +34,6 @@ const Listings = () => {
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 1);
   const ITEMS_PER_PAGE = 12;
-  const [suppliersWithIndustries, setSuppliersWithIndustries] = useState([]);
   
   // Build API params
   const apiParams = useMemo(() => {
@@ -58,44 +57,8 @@ const Listings = () => {
   const suppliers = suppliersResponse?.data || [];
   const meta = suppliersResponse?.meta || { total: 0, page: 1, limit: ITEMS_PER_PAGE, totalPages: 1 };
 
-  // Enrich suppliers with industries for display
-  useEffect(() => {
-    if (!suppliers || suppliers.length === 0) {
-      setSuppliersWithIndustries([]);
-      return;
-    }
-
-    let cancelled = false;
-
-    const loadIndustries = async () => {
-      try {
-        const enriched = await Promise.all(
-          suppliers.map(async (supplier) => {
-            try {
-              const res = await supplierApi.getIndustries(supplier.id);
-              const supplierIndustries = extractArray(res);
-              return { ...supplier, industries: supplierIndustries };
-            } catch {
-              return { ...supplier, industries: supplier.industries || [] };
-            }
-          })
-        );
-        if (!cancelled) {
-          setSuppliersWithIndustries(enriched);
-        }
-      } catch {
-        if (!cancelled) {
-          setSuppliersWithIndustries(suppliers);
-        }
-      }
-    };
-
-    loadIndustries();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [suppliers]);
+  // Use custom hook to enrich suppliers with industries
+  const { suppliers: suppliersWithIndustries = [] } = useSupplierEnrichment(suppliers);
 
   // Update URL when filters change
   useEffect(() => {
@@ -177,30 +140,34 @@ const Listings = () => {
 
   return (
     <div className="listings-page">
-      {/* Hero Section */}
-      <section className="listings-hero">
+      {/* ===== HERO SECTION (Self-contained) ===== */}
+      <header className="listings-hero">
         <div className="listings-hero-content">
-          <nav className="listings-breadcrumb">
+          {/* Breadcrumb Navigation */}
+          <nav className="listings-breadcrumb" aria-label="breadcrumb">
             <Link to="/">Home</Link> / <span>Suppliers Directory</span>
           </nav>
           
+          {/* Hero Title */}
           <h1 className="listings-hero-title">
             Find Verified <span>Suppliers</span>
           </h1>
           
+          {/* Hero Subtitle */}
           <p className="listings-hero-subtitle">
             Connect with trusted B2B suppliers and manufacturers worldwide. 
             Browse our curated network of verified business partners.
           </p>
           
           {/* Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="listings-search-bar">
-            <FiSearch size={22} className="listings-search-icon" />
+          <form onSubmit={handleSearchSubmit} className="listings-search-bar" role="search">
+            <FiSearch size={22} className="listings-search-icon" aria-hidden="true" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by company name, product, or industry..."
+              aria-label="Search suppliers"
             />
             <button type="submit" className="listings-search-btn">
               Search Suppliers
@@ -208,7 +175,7 @@ const Listings = () => {
           </form>
           
           {/* Stats Row */}
-          <div className="listings-stats-row">
+          <div className="listings-stats-row" role="region" aria-label="supplier statistics">
             <div className="listings-stat">
               <span className="listings-stat-number">{meta.total || suppliers.length}+</span>
               <span className="listings-stat-label">Total Suppliers</span>
@@ -223,21 +190,28 @@ const Listings = () => {
             </div>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Main Content */}
-      <div className="listings-content">
+      {/* ===== CONTENT SECTION (Filters + Listings) ===== */}
+      <section className="listings-content" role="main">
         {/* Mobile Filter Toggle */}
         <button 
           className="listings-mobile-filter-toggle"
           onClick={() => setShowFilters(!showFilters)}
+          aria-expanded={showFilters}
+          aria-controls="filters-sidebar"
         >
           <FiFilter size={18} />
           {showFilters ? 'Hide Filters' : 'Show Filters'}
         </button>
 
         {/* Filter Sidebar */}
-        <aside className={`listings-sidebar ${showFilters ? 'open' : ''}`}>
+        <aside 
+          id="filters-sidebar"
+          className={`listings-sidebar ${showFilters ? 'open' : ''}`}
+          role="complementary"
+          aria-label="Supplier filters"
+        >
           <div className="listings-filter-card">
             <div className="listings-filter-header">
               <h2 className="listings-filter-title">
@@ -395,6 +369,8 @@ const Listings = () => {
                           <img
                             src={supplier.logoUrl || supplier.logo}
                             alt={supplier.companyName}
+                            loading="lazy"
+                            decoding="async"
                           />
                         ) : (
                           <span>{supplier.companyName?.charAt(0)?.toUpperCase() || 'S'}</span>
@@ -508,7 +484,7 @@ const Listings = () => {
             </nav>
           )}
         </main>
-      </div>
+      </section>
     </div>
   );
 };

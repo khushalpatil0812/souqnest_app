@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiFilter, FiRefreshCw, FiUpload, FiX } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiFilter, FiRefreshCw, FiUpload, FiX, FiList, FiHelpCircle, FiLayers } from 'react-icons/fi';
 import Table from '../../components/Table';
 import Badge from '../../components/Badge';
 import Button from '../../components/Button';
@@ -31,6 +31,15 @@ const Products = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
 
+  // Specifications state (array of { key, value } pairs)
+  const [specifications, setSpecifications] = useState([]);
+  // Features state (array of { title, description } items)
+  const [features, setFeatures] = useState([]);
+  // FAQs state (array of { question, answer } items)
+  const [faqs, setFaqs] = useState([]);
+  // Active form tab
+  const [formTab, setFormTab] = useState('basic');
+
   useEffect(() => {
     fetchProducts();
     fetchCategories();
@@ -40,11 +49,15 @@ const Products = () => {
     try {
       setLoading(true);
       const response = await productApi.getAll();
-      setProducts(extractArray(response));
+      console.log('Admin Products raw response:', response);
+      const extracted = extractArray(response);
+      console.log('Admin Products extracted:', extracted.length, 'items');
+      setProducts(extracted);
       setError('');
     } catch (err) {
       setError('Failed to load products');
-      console.error(err);
+      console.error('Failed to load products:', err);
+      console.error('Error response:', err.response?.data);
     } finally {
       setLoading(false);
     }
@@ -126,14 +139,54 @@ const Products = () => {
         dataToSend.prices = prices;
       }
 
+      let productId = selectedProductId;
+
       if (editMode) {
         await productApi.update(selectedProductId, dataToSend);
-        alert('Product updated successfully!');
       } else {
-        await productApi.create(dataToSend);
-        alert('Product created successfully!');
+        const createRes = await productApi.create(dataToSend);
+        // Extract created product ID from response
+        productId = createRes?.id || createRes?.data?.id || createRes?._id || createRes?.data?._id;
+        console.log('Created product ID:', productId);
       }
 
+      // Save specifications, features, and FAQs if product ID is available
+      if (productId) {
+        const savePromises = [];
+
+        // Save specifications if any
+        const validSpecs = specifications.filter(s => s.key && s.key.trim() && s.value && s.value.trim());
+        if (validSpecs.length > 0) {
+          savePromises.push(
+            productApi.updateSpecifications(productId, { specifications: validSpecs.map(s => ({ key: s.key.trim(), value: s.value.trim() })) })
+              .catch(err => console.error('Failed to save specifications:', err))
+          );
+        }
+
+        // Save features if any
+        const validFeatures = features.filter(f => f.title && f.title.trim());
+        if (validFeatures.length > 0) {
+          savePromises.push(
+            productApi.updateFeatures(productId, { features: validFeatures.map(f => ({ title: f.title.trim(), description: f.description?.trim() || '' })) })
+              .catch(err => console.error('Failed to save features:', err))
+          );
+        }
+
+        // Save FAQs if any
+        const validFaqs = faqs.filter(f => f.question && f.question.trim() && f.answer && f.answer.trim());
+        if (validFaqs.length > 0) {
+          savePromises.push(
+            productApi.updateFaqs(productId, { faqs: validFaqs.map(f => ({ question: f.question.trim(), answer: f.answer.trim() })) })
+              .catch(err => console.error('Failed to save FAQs:', err))
+          );
+        }
+
+        if (savePromises.length > 0) {
+          await Promise.all(savePromises);
+        }
+      }
+
+      alert(`Product ${editMode ? 'updated' : 'created'} successfully!`);
       setIsModalOpen(false);
       resetForm();
       fetchProducts();
@@ -168,18 +221,69 @@ const Products = () => {
       priceINR: inrPrice ? String(inrPrice.amount) : '',
       priceSAR: sarPrice ? String(sarPrice.amount) : '',
     });
+    setFormTab('basic');
+
+    // Load existing specifications
+    setSpecifications(
+      Array.isArray(product.specifications) && product.specifications.length > 0
+        ? product.specifications.map(s => ({ key: s.key || '', value: s.value || '' }))
+        : []
+    );
+
+    // Load existing features
+    if (productId) {
+      productApi.getFeatures(productId)
+        .then(res => {
+          const feats = extractArray(res);
+          setFeatures(feats.length > 0 ? feats.map(f => ({ title: f.title || '', description: f.description || '' })) : []);
+        })
+        .catch(() => setFeatures(Array.isArray(product.features) ? product.features.map(f => ({ title: f.title || '', description: f.description || '' })) : []));
+    }
+
+    // Load existing FAQs
+    setFaqs(
+      Array.isArray(product.faqs) && product.faqs.length > 0
+        ? product.faqs.map(f => ({ question: f.question || '', answer: f.answer || '' }))
+        : []
+    );
+
     setIsModalOpen(true);
   };
 
   const handleDelete = async (id) => {
+    if (!id) {
+      console.error('Delete failed: No product ID provided');
+      alert('Cannot delete: Product ID is missing');
+      return;
+    }
+    console.log('Attempting to delete product with ID:', id);
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await productApi.delete(id);
+        alert('Product deleted successfully!');
         fetchProducts();
       } catch (err) {
         console.error('Failed to delete product:', err);
-        alert('Failed to delete product');
+        console.error('Delete URL attempted:', `/products/${id}`);
+        console.error('Error response:', err.response?.data);
+        alert(err.response?.data?.message || 'Failed to delete product');
       }
+    }
+  };
+
+  const handleToggleStatus = async (product) => {
+    const id = product._id || product.id;
+    if (!id) {
+      setError('Cannot toggle status: Product ID is missing');
+      return;
+    }
+    try {
+      await productApi.update(id, { isActive: !product.isActive });
+      fetchProducts();
+    } catch (err) {
+      const errMsg = err.response?.data?.message || err.message;
+      console.error('Toggle status failed:', errMsg);
+      setError('Failed to update product status: ' + errMsg);
     }
   };
 
@@ -189,6 +293,10 @@ const Products = () => {
     setSelectedProductId(null);
     setImagePreview(null);
     setImageInputMethod('url');
+    setSpecifications([]);
+    setFeatures([]);
+    setFaqs([]);
+    setFormTab('basic');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -325,9 +433,24 @@ const Products = () => {
       label: 'Status',
       key: 'isActive',
       render: (row) => (
-        <Badge variant={row.isActive ? 'success' : 'default'}>
-          {row.isActive ? 'Active' : 'Inactive'}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleToggleStatus(row)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400 ${
+              row.isActive ? 'bg-green-500' : 'bg-gray-300'
+            }`}
+            title={row.isActive ? 'Click to deactivate' : 'Click to activate'}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                row.isActive ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className={`text-xs font-medium ${row.isActive ? 'text-green-600' : 'text-gray-500'}`}>
+            {row.isActive ? 'Active' : 'Inactive'}
+          </span>
+        </div>
       )
     },
     {
@@ -491,199 +614,289 @@ const Products = () => {
         size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-primary-text mb-1">Product Name *</label>
-            <input
-              type="text" name="name" value={formData.name} onChange={handleChange} required
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Enter product name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-primary-text mb-1">Slug *</label>
-            <input
-              type="text" name="slug" value={formData.slug} onChange={handleChange} required
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="product-slug"
-            />
-            <p className="text-xs text-gray-500 mt-1">Auto-generated from name, can be edited</p>
-          </div>
-
-          {/* Category Selection - Parent & Subcategory separated */}
-          <div>
-            <label className="block text-sm font-medium text-primary-text mb-1">Category *</label>
-            <select
-              name="categoryId" value={formData.categoryId} onChange={handleChange} required
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="">Select Category</option>
-              {parentCategories.map(parent => (
-                <optgroup key={parent.id} label={`📁 ${parent.name}`}>
-                  <option value={parent.id}>{parent.name} (Parent)</option>
-                  {getSubcategories(parent.id).map(sub => (
-                    <option key={sub.id} value={sub.id}>&nbsp;&nbsp;↳ {sub.name}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-            <p className="text-xs text-gray-500 mt-1">Select a parent category or subcategory</p>
-          </div>
-
-          {/* Product Image Upload Section */}
-          <div>
-            <label className="block text-sm font-medium text-primary-text mb-2">Product Image</label>
-            
-            {/* Toggle between URL and File Upload */}
-            <div className="flex gap-2 mb-3">
+          {/* Form Tabs */}
+          <div className="flex border-b border-border overflow-x-auto">
+            {[
+              { key: 'basic', label: 'Basic Info', icon: <FiEdit size={14} /> },
+              { key: 'specifications', label: 'Specifications', icon: <FiLayers size={14} /> },
+              { key: 'features', label: 'Features', icon: <FiList size={14} /> },
+              { key: 'faqs', label: 'FAQs', icon: <FiHelpCircle size={14} /> },
+            ].map(tab => (
               <button
+                key={tab.key}
                 type="button"
-                onClick={() => setImageInputMethod('url')}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  imageInputMethod === 'url'
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                onClick={() => setFormTab(tab.key)}
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  formTab === tab.key
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                📎 Paste URL (Recommended)
+                {tab.icon} {tab.label}
               </button>
-              <button
-                type="button"
-                onClick={() => setImageInputMethod('file')}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  imageInputMethod === 'file'
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                📤 Upload File
-              </button>
-            </div>
+            ))}
+          </div>
 
-            {/* URL Input Method */}
-            {imageInputMethod === 'url' && (
+          {/* ======= BASIC INFO TAB ======= */}
+          {formTab === 'basic' && (
+            <div className="space-y-4">
               <div>
+                <label className="block text-sm font-medium text-primary-text mb-1">Product Name *</label>
                 <input
-                  type="url"
-                  name="imageUrl"
-                  value={formData.imageUrl}
-                  onChange={handleChange}
+                  type="text" name="name" value={formData.name} onChange={handleChange} required
                   className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="https://example.com/product.jpg"
+                  placeholder="Enter product name"
                 />
-                <p className="text-xs text-gray-500 mt-1">✓ Recommended: Fast and reliable</p>
               </div>
-            )}
 
-            {/* File Upload Method */}
-            {imageInputMethod === 'file' && (
-              <div
-                onDrop={handleImageDrop}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-blue-50 transition-colors cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <FiUpload size={24} className="mx-auto text-gray-400 mb-2" />
-                <p className="text-sm font-medium text-gray-700">Drag and drop image here</p>
-                <p className="text-xs text-gray-500 mt-1">or click to select (Max 5MB)</p>
+              <div>
+                <label className="block text-sm font-medium text-primary-text mb-1">Slug *</label>
                 <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageFileChange}
-                  className="hidden"
+                  type="text" name="slug" value={formData.slug} onChange={handleChange} required
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="product-slug"
                 />
+                <p className="text-xs text-gray-500 mt-1">Auto-generated from name, can be edited</p>
               </div>
-            )}
 
-            {/* Image Preview */}
-            {formData.imageUrl && (
-              <div className="mt-3 relative">
-                <div className="p-2 border border-border rounded-lg bg-gray-50">
-                  <img
-                    src={formData.imageUrl}
-                    alt="Product preview"
-                    className="max-h-48 object-cover rounded mx-auto"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData(prev => ({ ...prev, imageUrl: '' }));
-                    setImagePreview(null);
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = '';
-                    }
-                  }}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
-                  title="Remove image"
+              {/* Category Selection */}
+              <div>
+                <label className="block text-sm font-medium text-primary-text mb-1">Category *</label>
+                <select
+                  name="categoryId" value={formData.categoryId} onChange={handleChange} required
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <FiX size={14} />
+                  <option value="">Select Category</option>
+                  {parentCategories.map(parent => (
+                    <optgroup key={parent.id} label={`📁 ${parent.name}`}>
+                      <option value={parent.id}>{parent.name} (Parent)</option>
+                      {getSubcategories(parent.id).map(sub => (
+                        <option key={sub.id} value={sub.id}>&nbsp;&nbsp;↳ {sub.name}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+
+              {/* Product Image Upload Section */}
+              <div>
+                <label className="block text-sm font-medium text-primary-text mb-2">Product Image</label>
+                <div className="flex gap-2 mb-3">
+                  <button type="button" onClick={() => setImageInputMethod('url')}
+                    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${imageInputMethod === 'url' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    📎 Paste URL
+                  </button>
+                  <button type="button" onClick={() => setImageInputMethod('file')}
+                    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${imageInputMethod === 'file' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    📤 Upload File
+                  </button>
+                </div>
+                {imageInputMethod === 'url' && (
+                  <input type="url" name="imageUrl" value={formData.imageUrl} onChange={handleChange}
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="https://example.com/product.jpg" />
+                )}
+                {imageInputMethod === 'file' && (
+                  <div onDrop={handleImageDrop} onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-blue-50 transition-colors cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}>
+                    <FiUpload size={24} className="mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm font-medium text-gray-700">Drag and drop image here</p>
+                    <p className="text-xs text-gray-500 mt-1">or click to select (Max 5MB)</p>
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
+                  </div>
+                )}
+                {formData.imageUrl && (
+                  <div className="mt-3 relative">
+                    <div className="p-2 border border-border rounded-lg bg-gray-50">
+                      <img src={formData.imageUrl} alt="Product preview" className="max-h-48 object-cover rounded mx-auto"
+                        onError={(e) => { e.target.style.display = 'none'; }} />
+                    </div>
+                    <button type="button" onClick={() => { setFormData(prev => ({ ...prev, imageUrl: '' })); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors" title="Remove image">
+                      <FiX size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Pricing */}
+              <div>
+                <label className="block text-sm font-medium text-primary-text mb-2">Product Price {!editMode && '*'}</label>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                  <p className="text-sm text-blue-800">
+                    💡 <strong>Auto-Currency Conversion:</strong> Enter price in INR (₹). SAR (﷼) will be automatically calculated.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Price in INR (₹) {!editMode && '*'}</label>
+                    <div className="flex gap-2">
+                      <input type="number" name="priceINR" step="0.01" min="0.01" value={formData.priceINR} onChange={handleChange} required={!editMode}
+                        className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Enter price in INR" />
+                      <div className="px-4 py-2 bg-gray-100 border border-border rounded-lg text-gray-700 font-medium min-w-[80px] flex items-center justify-center">INR ₹</div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Price in SAR (﷼) - Auto-calculated</label>
+                    <div className="flex gap-2">
+                      <input type="number" name="priceSAR" step="0.01" value={formData.priceSAR} readOnly disabled
+                        className="flex-1 px-4 py-2 border border-border rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed" placeholder="Will be auto-calculated from INR" />
+                      <div className="px-4 py-2 bg-gray-100 border border-border rounded-lg text-gray-700 font-medium min-w-[80px] flex items-center justify-center">SAR ﷼</div>
+                    </div>
+                    {formData.priceSAR && <p className="text-xs text-green-600 mt-1">✓ Converted at real-time rate</p>}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-primary-text mb-1">Description</label>
+                <textarea name="overview" value={formData.overview} onChange={handleChange}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  rows="4" placeholder="Product description..."></textarea>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleChange} className="rounded" />
+                <label className="text-sm font-medium">Product is Active</label>
+              </div>
+            </div>
+          )}
+
+          {/* ======= SPECIFICATIONS TAB ======= */}
+          {formTab === 'specifications' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-primary-text flex items-center gap-2">
+                    <FiLayers size={16} /> Product Specifications
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Add key-value pairs like Material, Weight, Dimensions, etc.</p>
+                </div>
+                <button type="button" onClick={() => setSpecifications(prev => [...prev, { key: '', value: '' }])}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+                  <FiPlus size={14} /> Add Spec
                 </button>
               </div>
-            )}
-          </div>
-
-          {/* Pricing */}
-          <div>
-            <label className="block text-sm font-medium text-primary-text mb-2">Product Price {!editMode && '*'}</label>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-              <p className="text-sm text-blue-800">
-                💡 <strong>Auto-Currency Conversion:</strong> Enter price in INR (₹). SAR (﷼) will be automatically calculated.
-              </p>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Price in INR (₹) {!editMode && '*'}</label>
-                <div className="flex gap-2">
-                  <input
-                    type="number" name="priceINR" step="0.01" min="0.01"
-                    value={formData.priceINR} onChange={handleChange} required={!editMode}
-                    className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Enter price in INR"
-                  />
-                  <div className="px-4 py-2 bg-gray-100 border border-border rounded-lg text-gray-700 font-medium min-w-[80px] flex items-center justify-center">
-                    INR ₹
-                  </div>
+              {specifications.length === 0 ? (
+                <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                  <FiLayers className="mx-auto text-gray-300 mb-2" size={32} />
+                  <p className="text-sm text-gray-400">No specifications added yet</p>
+                  <button type="button" onClick={() => setSpecifications([{ key: '', value: '' }])}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium">+ Add first specification</button>
                 </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Price in SAR (﷼) - Auto-calculated</label>
-                <div className="flex gap-2">
-                  <input
-                    type="number" name="priceSAR" step="0.01" value={formData.priceSAR}
-                    readOnly disabled
-                    className="flex-1 px-4 py-2 border border-border rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                    placeholder="Will be auto-calculated from INR"
-                  />
-                  <div className="px-4 py-2 bg-gray-100 border border-border rounded-lg text-gray-700 font-medium min-w-[80px] flex items-center justify-center">
-                    SAR ﷼
-                  </div>
+              ) : (
+                <div className="space-y-3">
+                  {specifications.map((spec, idx) => (
+                    <div key={idx} className="flex gap-2 items-start">
+                      <input type="text" value={spec.key} placeholder="Key (e.g. Material)"
+                        onChange={(e) => { const updated = [...specifications]; updated[idx].key = e.target.value; setSpecifications(updated); }}
+                        className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="text" value={spec.value} placeholder="Value (e.g. Stainless Steel)"
+                        onChange={(e) => { const updated = [...specifications]; updated[idx].value = e.target.value; setSpecifications(updated); }}
+                        className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <button type="button" onClick={() => setSpecifications(prev => prev.filter((_, i) => i !== idx))}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Remove">
+                        <FiTrash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                {formData.priceSAR && <p className="text-xs text-green-600 mt-1">✓ Converted at real-time rate</p>}
-              </div>
+              )}
             </div>
-          </div>
+          )}
 
-          <div>
-            <label className="block text-sm font-medium text-primary-text mb-1">Description</label>
-            <textarea
-              name="overview" value={formData.overview} onChange={handleChange}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              rows="4" placeholder="Product description..."
-            ></textarea>
-          </div>
+          {/* ======= FEATURES TAB ======= */}
+          {formTab === 'features' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-primary-text flex items-center gap-2">
+                    <FiList size={16} /> Product Features
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Highlight key features of the product.</p>
+                </div>
+                <button type="button" onClick={() => setFeatures(prev => [...prev, { title: '', description: '' }])}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors">
+                  <FiPlus size={14} /> Add Feature
+                </button>
+              </div>
+              {features.length === 0 ? (
+                <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                  <FiList className="mx-auto text-gray-300 mb-2" size={32} />
+                  <p className="text-sm text-gray-400">No features added yet</p>
+                  <button type="button" onClick={() => setFeatures([{ title: '', description: '' }])}
+                    className="mt-2 text-sm text-emerald-600 hover:text-emerald-700 font-medium">+ Add first feature</button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {features.map((feat, idx) => (
+                    <div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-gray-400">Feature #{idx + 1}</span>
+                        <button type="button" onClick={() => setFeatures(prev => prev.filter((_, i) => i !== idx))}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Remove">
+                          <FiTrash2 size={14} />
+                        </button>
+                      </div>
+                      <input type="text" value={feat.title} placeholder="Feature title"
+                        onChange={(e) => { const updated = [...features]; updated[idx].title = e.target.value; setFeatures(updated); }}
+                        className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <textarea value={feat.description} placeholder="Feature description (optional)"
+                        onChange={(e) => { const updated = [...features]; updated[idx].description = e.target.value; setFeatures(updated); }}
+                        className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" rows="2"></textarea>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-          <div className="flex items-center space-x-2">
-            <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleChange} className="rounded" />
-            <label className="text-sm font-medium">Product is Active</label>
-          </div>
+          {/* ======= FAQS TAB ======= */}
+          {formTab === 'faqs' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-primary-text flex items-center gap-2">
+                    <FiHelpCircle size={16} /> Frequently Asked Questions
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Add common questions and answers about the product.</p>
+                </div>
+                <button type="button" onClick={() => setFaqs(prev => [...prev, { question: '', answer: '' }])}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-violet-50 text-violet-600 rounded-lg text-sm font-medium hover:bg-violet-100 transition-colors">
+                  <FiPlus size={14} /> Add FAQ
+                </button>
+              </div>
+              {faqs.length === 0 ? (
+                <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                  <FiHelpCircle className="mx-auto text-gray-300 mb-2" size={32} />
+                  <p className="text-sm text-gray-400">No FAQs added yet</p>
+                  <button type="button" onClick={() => setFaqs([{ question: '', answer: '' }])}
+                    className="mt-2 text-sm text-violet-600 hover:text-violet-700 font-medium">+ Add first FAQ</button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {faqs.map((faq, idx) => (
+                    <div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-gray-400">FAQ #{idx + 1}</span>
+                        <button type="button" onClick={() => setFaqs(prev => prev.filter((_, i) => i !== idx))}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Remove">
+                          <FiTrash2 size={14} />
+                        </button>
+                      </div>
+                      <input type="text" value={faq.question} placeholder="Question"
+                        onChange={(e) => { const updated = [...faqs]; updated[idx].question = e.target.value; setFaqs(updated); }}
+                        className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <textarea value={faq.answer} placeholder="Answer"
+                        onChange={(e) => { const updated = [...faqs]; updated[idx].answer = e.target.value; setFaqs(updated); }}
+                        className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" rows="3"></textarea>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button variant="outline" type="button" onClick={() => { setIsModalOpen(false); resetForm(); }}>Cancel</Button>

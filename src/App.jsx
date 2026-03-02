@@ -1,7 +1,6 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import AppRoutes from './routes/AppRoutes'
@@ -19,6 +18,10 @@ const queryClient = new QueryClient({
   },
 })
 
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() => import('@tanstack/react-query-devtools').then((module) => ({ default: module.ReactQueryDevtools })))
+  : null
+
 function App() {
   return (
     <ErrorBoundary>
@@ -30,7 +33,11 @@ function App() {
             </CartProvider>
           </AuthProvider>
         </BrowserRouter>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {ReactQueryDevtools && (
+          <Suspense fallback={null}>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
+        )}
       </QueryClientProvider>
     </ErrorBoundary>
   )
