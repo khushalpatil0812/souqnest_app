@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { industryApi, extractArray } from '../services/api';
-import { DEMO_MODE, demoIndustries } from '../data/dummy';
 
 // Query keys
 export const industryKeys = {
@@ -15,9 +14,6 @@ export const useIndustries = () => {
   return useQuery({
     queryKey: industryKeys.lists(),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        return demoIndustries;
-      }
       const response = await industryApi.getAll();
       return extractArray(response);
     },

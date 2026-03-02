@@ -5,12 +5,14 @@ import { useCategories } from '../../hooks/useCategories';
 import { useSuppliers } from '../../hooks/useSuppliers';
 import { useProducts } from '../../hooks/useProducts';
 import { useIndustries } from '../../hooks/useIndustries';
+import { supplierApi, extractArray } from '../../services/api';
 import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const suppliersScrollRef = useRef(null);
+  const [suppliersWithIndustries, setSuppliersWithIndustries] = useState([]);
   
   // Navbar scroll shrink effect
   useEffect(() => {
@@ -39,6 +41,47 @@ const Home = () => {
   const { data: products = [], isLoading: productsLoading } = useProducts();
   const { data: industries = [], isLoading: industriesLoading } = useIndustries();
 
+  // Enrich suppliers with industries for homepage cards
+  useEffect(() => {
+    if (!suppliers || suppliers.length === 0) {
+      setSuppliersWithIndustries([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadIndustries = async () => {
+      try {
+        const enriched = await Promise.all(
+          suppliers.map(async (supplier) => {
+            try {
+              const res = await supplierApi.getIndustries(supplier.id);
+              const supplierIndustries = extractArray(res);
+              return { ...supplier, industries: supplierIndustries };
+            } catch {
+              return { ...supplier, industries: supplier.industries || [] };
+            }
+          })
+        );
+        if (!cancelled) {
+          setSuppliersWithIndustries(enriched);
+        }
+      } catch {
+        if (!cancelled) {
+          setSuppliersWithIndustries(suppliers);
+        }
+      }
+    };
+
+    loadIndustries();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [suppliers]);
+
+  const suppliersSource = suppliersWithIndustries.length ? suppliersWithIndustries : suppliers;
+
   // Get featured products (limit to 6 for homepage)
   const featuredProducts = products.slice(0, 6);
   
@@ -46,7 +89,7 @@ const Home = () => {
   const featuredIndustries = industries.slice(0, 4);
 
   // Get featured suppliers (limit to 3 for homepage)
-  const featuredSuppliers = suppliers
+  const featuredSuppliers = suppliersSource
     .filter(supplier => supplier.isFeatured)
     .slice(0, 3);
 
@@ -75,7 +118,15 @@ const Home = () => {
           <div key={supplier.id} className="supplier-card">
             <div className="supplier-avatar-wrapper">
               <div className="supplier-avatar orange-avatar">
-                {(supplier.companyName || supplier.name || 'S').charAt(0).toUpperCase()}
+                {supplier.logoUrl || supplier.logo ? (
+                  <img
+                    src={supplier.logoUrl || supplier.logo}
+                    alt={supplier.companyName || supplier.name}
+                    className="supplier-logo"
+                  />
+                ) : (
+                  (supplier.companyName || supplier.name || 'S').charAt(0).toUpperCase()
+                )}
               </div>
               {supplier.isVerified && (
                 <div className="supplier-verified-check">
@@ -84,7 +135,7 @@ const Home = () => {
               )}
             </div>
 
-            {supplier.isVerified && (
+              {supplier.isAuthorizedPartner && (
               <div className="supplier-verified-badge authorized-blue">
                 <FiShield size={16} style={{ color: '#18181B', marginRight: 4 }} />
                 <span style={{ color: '#2563EB' }}>Authorized Partner</span>
@@ -120,6 +171,19 @@ const Home = () => {
               {supplier.isFeatured && (
                 <span className="supplier-tag featured">Featured</span>
               )}
+              {supplier.industries && supplier.industries.length > 0 &&
+                supplier.industries.slice(0, 2).map((ind, idx) => {
+                  const name =
+                    ind.industry?.name ||
+                    ind.name ||
+                    (typeof ind === 'string' ? ind : 'Industry');
+                  const key = ind.id || ind.industryId || idx;
+                  return (
+                    <span key={key} className="supplier-tag">
+                      {name}
+                    </span>
+                  );
+                })}
             </div>
 
             {/* Reviews removed as requested */}
@@ -400,13 +464,13 @@ const Home = () => {
         )}
 
         {/* Suppliers Carousel */}
-        {!suppliersLoading && featuredSuppliers.length > 0 && (
+        {!suppliersLoading && featuredSuppliers.length > 0 &&
           renderSuppliersCarousel(featuredSuppliers, false)
-        )}
+        }
 
         {/* No Featured Suppliers - Show Regular Suppliers */}
         {!suppliersLoading && featuredSuppliers.length === 0 && suppliers.length > 0 && (
-          renderSuppliersCarousel(suppliers.slice(0, 3), true)
+          renderSuppliersCarousel(suppliersSource.slice(0, 3), true)
         )}
 
         {/* Empty State */}

@@ -21,6 +21,7 @@ import {
 import { useSuppliersWithPagination } from '../../hooks/useSuppliers';
 import { useCategories } from '../../hooks/useCategories';
 import { useIndustries } from '../../hooks/useIndustries';
+import { supplierApi, extractArray } from '../../services/api';
 import './Listings.css';
 
 const Listings = () => {
@@ -33,6 +34,7 @@ const Listings = () => {
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 1);
   const ITEMS_PER_PAGE = 12;
+  const [suppliersWithIndustries, setSuppliersWithIndustries] = useState([]);
   
   // Build API params
   const apiParams = useMemo(() => {
@@ -55,6 +57,45 @@ const Listings = () => {
   // Extract suppliers and pagination meta
   const suppliers = suppliersResponse?.data || [];
   const meta = suppliersResponse?.meta || { total: 0, page: 1, limit: ITEMS_PER_PAGE, totalPages: 1 };
+
+  // Enrich suppliers with industries for display
+  useEffect(() => {
+    if (!suppliers || suppliers.length === 0) {
+      setSuppliersWithIndustries([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadIndustries = async () => {
+      try {
+        const enriched = await Promise.all(
+          suppliers.map(async (supplier) => {
+            try {
+              const res = await supplierApi.getIndustries(supplier.id);
+              const supplierIndustries = extractArray(res);
+              return { ...supplier, industries: supplierIndustries };
+            } catch {
+              return { ...supplier, industries: supplier.industries || [] };
+            }
+          })
+        );
+        if (!cancelled) {
+          setSuppliersWithIndustries(enriched);
+        }
+      } catch {
+        if (!cancelled) {
+          setSuppliersWithIndustries(suppliers);
+        }
+      }
+    };
+
+    loadIndustries();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [suppliers]);
 
   // Update URL when filters change
   useEffect(() => {
@@ -343,15 +384,18 @@ const Listings = () => {
           {/* Suppliers Grid */}
           {!isLoading && !error && suppliers.length > 0 && (
             <div className={`suppliers-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
-              {suppliers.map((supplier, index) => (
+              {(suppliersWithIndustries.length ? suppliersWithIndustries : suppliers).map((supplier, index) => (
                 <div key={supplier.id} className="slc-card">
                   <div className={`slc-header ${index % 2 === 0 ? 'slc-header-even' : 'slc-header-odd'}`}> 
                     {/* Left Section - 70% */}
                     <div className="slc-left">
                       {/* Logo Box */}
                       <div className="slc-logo-box">
-                        {supplier.logo ? (
-                          <img src={supplier.logo} alt={supplier.companyName} />
+                        {supplier.logoUrl || supplier.logo ? (
+                          <img
+                            src={supplier.logoUrl || supplier.logo}
+                            alt={supplier.companyName}
+                          />
                         ) : (
                           <span>{supplier.companyName?.charAt(0)?.toUpperCase() || 'S'}</span>
                         )}

@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { categoryApi, extractArray, extractObject } from '../services/api';
-import { DEMO_MODE, demoCategories } from '../data/dummy';
 
 // Query keys
 export const categoryKeys = {
@@ -18,9 +17,6 @@ export const useCategories = () => {
   return useQuery({
     queryKey: categoryKeys.lists(),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        return demoCategories;
-      }
       const response = await categoryApi.getAll();
       return extractArray(response);
     },
@@ -34,9 +30,6 @@ export const useCategoryTree = () => {
   return useQuery({
     queryKey: categoryKeys.trees(),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        return demoCategories;
-      }
       const response = await categoryApi.getTree();
       return extractArray(response);
     },
@@ -50,9 +43,6 @@ export const useCategory = (id) => {
   return useQuery({
     queryKey: categoryKeys.detail(id),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        return demoCategories.find((category) => category.id === id) || null;
-      }
       const response = await categoryApi.getById(id);
       return extractObject(response);
     },

@@ -106,7 +106,12 @@ export const CartProvider = ({ children }) => {
   // Get cart total (sum of all items)
   const getCartTotal = () => {
     return cart.reduce((total, item) => {
-      const price = item.prices?.find(p => p.currency === 'USD')?.amount || 0;
+      // Prefer INR, then SAR, then fall back to first available price
+      const price =
+        item.prices?.find(p => p.currency === 'INR')?.amount ??
+        item.prices?.find(p => p.currency === 'SAR')?.amount ??
+        item.prices?.[0]?.amount ??
+        0;
       return total + (price * item.quantity);
     }, 0);
   };

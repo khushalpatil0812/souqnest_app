@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supplierApi, extractArray, extractObject, extractPaginated } from '../services/api';
-import { DEMO_MODE, demoSuppliers, filterDemoSuppliers, demoPaginate } from '../data/dummy';
 
 // Query keys
 export const supplierKeys = {
@@ -18,9 +17,6 @@ export const useSuppliers = (params = {}) => {
   return useQuery({
     queryKey: supplierKeys.list(params),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        return filterDemoSuppliers(params);
-      }
       const response = await supplierApi.getAll(params);
       return extractArray(response);
     },
@@ -35,10 +31,6 @@ export const useSuppliersWithPagination = (params = {}) => {
   return useQuery({
     queryKey: supplierKeys.list({ ...params, paginated: true }),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        const filtered = filterDemoSuppliers(params);
-        return demoPaginate(filtered, params);
-      }
       const response = await supplierApi.getAll(params);
       return extractPaginated(response);
     },
@@ -52,9 +44,6 @@ export const useSupplier = (id) => {
   return useQuery({
     queryKey: supplierKeys.detail(id),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        return demoSuppliers.find((supplier) => supplier.id === id) || null;
-      }
       const response = await supplierApi.getById(id);
       return extractObject(response);
     },

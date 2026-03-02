@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productApi, extractArray, extractObject, extractPaginated } from '../services/api';
-import { DEMO_MODE, demoProducts, filterDemoProducts, demoPaginate } from '../data/dummy';
 
 // Query keys
 export const productKeys = {
@@ -19,9 +18,6 @@ export const useProducts = (params = {}) => {
   return useQuery({
     queryKey: productKeys.list(params),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        return filterDemoProducts(params);
-      }
       const response = await productApi.getAll(params);
       return extractArray(response);
     },
@@ -36,10 +32,6 @@ export const useProductsWithPagination = (params = {}) => {
   return useQuery({
     queryKey: productKeys.list({ ...params, paginated: true }),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        const filtered = filterDemoProducts(params);
-        return demoPaginate(filtered, params);
-      }
       const response = await productApi.getAll(params);
       return extractPaginated(response);
     },
@@ -53,9 +45,6 @@ export const useProduct = (slug) => {
   return useQuery({
     queryKey: productKeys.detail(slug),
     queryFn: async () => {
-      if (DEMO_MODE) {
-        return demoProducts.find((product) => product.slug === slug || product.id === slug) || null;
-      }
       const response = await productApi.getBySlug(slug);
       return extractObject(response);
     },

@@ -152,10 +152,16 @@ const Products = () => {
     }
   };
 
-  // Format price
+  // Format price based on selected currency (fallback to first price)
   const formatPrice = (prices) => {
     if (!prices || prices.length === 0) return null;
-    const price = prices[0];
+
+    let price = prices[0];
+    if (selectedCurrency) {
+      const match = prices.find(p => p.currency === selectedCurrency);
+      if (match) price = match;
+    }
+
     const symbol = price.currency === 'INR' ? '₹' : price.currency === 'SAR' ? 'ر.س' : '$';
     return `${symbol}${price.amount?.toLocaleString()}`;
   };
