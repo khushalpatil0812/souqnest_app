@@ -237,18 +237,20 @@ const Home = () => {
           </p>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="hero-search fade-up fade-up-delay-3">
-            <FiSearch size={20} className="hero-search-icon" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search suppliers, products, or categories..."
-            />
-            <button type="submit">
-              Search
-            </button>
-          </form>
+          <div className="hero-search-row fade-up fade-up-delay-3">
+            <form onSubmit={handleSearch} className="hero-search">
+              <FiSearch size={20} className="hero-search-icon" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search suppliers, products, or categories..."
+              />
+              <button type="submit">
+                Search
+              </button>
+            </form>
+          </div>
 
           {/* CTA Buttons */}
           <div className="hero-cta-row fade-up fade-up-delay-4">
@@ -284,6 +286,30 @@ const Home = () => {
             </div>
           </div>
         </div>
+
+        {/* Floating Visitors Card (right middle of hero) */}
+        <div className="hero-visitor-card">
+          <div className="hero-visitor-header">
+            <span className="hero-visitor-icon"><FiUsers size={16} /></span>
+            <span className="hero-visitor-label">Total Visitors</span>
+          </div>
+          <div className="hero-visitor-value">24.3K</div>
+          <div className="hero-visitor-trend">
+            <FiTrendingUp size={14} />
+            <span>+18% this month</span>
+          </div>
+        </div>
+
+        {/* Floating Sales Growth chip (bottom-left hero) */}
+        <div className="hero-sales-card">
+          <div className="hero-sales-icon">
+            <FiTrendingUp size={14} />
+          </div>
+          <div className="hero-sales-text">
+            <span className="hero-sales-label">Sales Growth</span>
+            <span className="hero-sales-value">+32.4%</span>
+          </div>
+        </div>
         </div>
       </section>
 
@@ -312,16 +338,14 @@ const Home = () => {
           <div className="categories-static-grid">
             {categories.slice(0, 6).map((category) => (
               <Link key={category.id} to={`/listings?category=${category.id}`}>
-                <div className="category-card category-card-static">
+                <div className="category-card category-card-static" style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center'}}>
                   <div className="category-icon">
                     {getCategoryIcon(category)}
                   </div>
-                  <div>
-                    <div className="category-name">{category.name}</div>
-                    {category.supplierCount && (
-                      <div className="category-count">{category.supplierCount} suppliers</div>
-                    )}
-                  </div>
+                  <div className="category-name" style={{marginTop:'10px', fontSize:'1.08rem', fontWeight:700}}>{category.name}</div>
+                  {category.supplierCount && (
+                    <div className="category-count" style={{fontSize:'0.95rem', fontWeight:600}}>{category.supplierCount} suppliers</div>
+                  )}
                 </div>
               </Link>
             ))}

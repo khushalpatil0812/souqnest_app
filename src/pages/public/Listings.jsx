@@ -144,7 +144,7 @@ const Listings = () => {
           </nav>
           
           <h1 className="listings-hero-title">
-            Find <span>Verified Suppliers</span>
+            Find Verified <span>Suppliers</span>
           </h1>
           
           <p className="listings-hero-subtitle">
@@ -395,7 +395,7 @@ const Listings = () => {
                           </span>
                         )}
                         {/* Category name */}
-                        <span style={{ marginLeft: supplier.isAuthorizedPartner ? 8 : 0 }}>
+                        <span style={{ marginLeft: supplier.isAuthorizedPartner ? 12 : 0, whiteSpace: 'nowrap' }}>
                           {supplier.category && (supplier.category.name || typeof supplier.category === 'string')
                             ? (supplier.category.name || supplier.category)
                             : 'Category'}

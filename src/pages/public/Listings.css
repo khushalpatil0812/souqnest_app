@@ -26,11 +26,36 @@
 }
 
 /* buttons full width inside column */
+
 .slc-btn-link,
-.slc-btn {
+.slc-btn,
+.listings-search-btn,
+.listings-apply-btn,
+.listings-view-btn,
+.listings-page-btn,
+.listings-mobile-filter-toggle {
   width: 100%;
   max-width: 100%;
   text-align: center;
+  border: 1.5px solid #2563eb !important; /* Tailwind blue-600 */
+  border-radius: 8px;
+  background: #fff;
+  color: #2563eb;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: none;
+}
+
+.slc-btn:hover,
+.listings-search-btn:hover,
+.listings-apply-btn:hover,
+.listings-view-btn:hover,
+.listings-page-btn:hover,
+.listings-mobile-filter-toggle:hover {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: #1e40af !important;
 }
 
 /* prevent overflow */
@@ -63,8 +88,9 @@
 }
 
 /* ====== HERO/HEADER SECTION ====== */
+/* Lightened hero background */
 .listings-hero {
-  background: linear-gradient(135deg, #E8EAEF 0%, #D9DCE0 50%, #EBF0F5 100%);
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 50%, #F8FAFC 100%);
   padding: 90px clamp(16px, 5vw, 80px) 72px;
   position: relative;
   overflow: hidden;
@@ -139,11 +165,9 @@
   text-align: center;
 }
 
+/* Blue color for 'Suppliers' word */
 .listings-hero-title span {
-  background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #2563eb; /* Tailwind blue-600 */
   font-weight: 900;
 }
 
@@ -956,11 +980,22 @@
   box-shadow: 0 4px 16px rgba(30, 64, 175, 0.2);
 }
 
-.slc-btn-rfq:hover {
-  border-color: #F59E0B;
-  background: #F59E0B;
+/* Make Submit RFQ button blue */
+/* Submit RFQ button: white by default, blue on hover/active */
+.slc-btn-rfq {
+  border-color: #1E40AF;
+  background: #FFFFFF;
+  color: #1E40AF;
+  transition: all 0.2s;
+}
+/* Blue on hover and active */
+.slc-btn-rfq:hover,
+.slc-btn-rfq:active,
+.slc-btn-rfq:focus {
+  border-color: #2563eb;
+  background: linear-gradient(135deg, #2563eb 0%, #1E40AF 100%);
   color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.18);
 }
 
 /* Mobile Responsive */

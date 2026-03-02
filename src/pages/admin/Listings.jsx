@@ -114,9 +114,17 @@ const Listings = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-primary-text">Listings Management</h1>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <FiPlus className="inline mr-2" /> Add New Listing
-        </Button>
+        <div className="flex gap-3">
+          <button
+            className="listings-search-btn flex items-center justify-center px-2 py-1 rounded-full text-xs font-semibold border border-blue-600 bg-white text-blue-600 shadow-sm hover:bg-blue-50 transition-all"
+            style={{ minWidth: 0, height: '28px', width: '90px', borderRadius: '18px', fontSize: '12px', padding: '0 12px' }}
+          >
+            Search Supplier
+          </button>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <FiPlus className="inline mr-2" /> Add New Listing
+          </Button>
+        </div>
       </div>
 
       <Table columns={columns} data={listings} />
@@ -126,16 +134,16 @@ const Listings = () => {
         onClose={() => setIsModalOpen(false)}
         title="Add New Listing"
       >
-                          {/* Category */}
-                          {supplier.category && (
-                            <div className="slc-tag-group">
-                              <span className="slc-tag slc-tag-blue">
-                                <FiGrid size={13} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                                {typeof supplier.category === 'string' ? supplier.category : supplier.category.name}
-                              </span>
-                            </div>
-                          )}
+        <form className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-primary-text mb-1">Company Name</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Enter company name"
+            />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-primary-text mb-1">Category</label>
             <select className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
@@ -145,6 +153,7 @@ const Listings = () => {
               <option>Textiles</option>
             </select>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-primary-text mb-1">Location</label>
             <input
@@ -153,6 +162,7 @@ const Listings = () => {
               placeholder="Enter location"
             />
           </div>
+
           <div className="flex gap-4">
             <label className="flex items-center space-x-2">
               <input type="checkbox" className="rounded" />
@@ -167,8 +177,11 @@ const Listings = () => {
               <span className="text-sm">Authorized</span>
             </label>
           </div>
+
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
             <Button>Save Listing</Button>
           </div>
         </form>

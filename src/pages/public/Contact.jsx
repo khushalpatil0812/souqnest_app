@@ -85,14 +85,6 @@ const Contact = () => {
     setLineItems(prev => prev.filter((_, idx) => idx !== index));
   };
 
-  const duplicateLineItem = (index) => {
-    setLineItems(prev => [
-      ...prev.slice(0, index + 1),
-      { ...prev[index] },
-      ...prev.slice(index + 1)
-    ]);
-  };
-
   const updateLineItem = (index, field, value) => {
     setLineItems(prev => {
       const updated = [...prev];
@@ -298,107 +290,94 @@ const Contact = () => {
             </div>
           </div>
 
-          {/* Line Item Specifications Table */}
+          {/* Line Item Specifications Grid */}
           <div className="rfq-section">
             <div className="rfq-table-header">
               <h3>LINE ITEM SPECIFICATIONS</h3>
               <span className="rfq-table-tag">ENTERPRISE PROCUREMENT GRID</span>
             </div>
 
-            <div className="rfq-table-wrapper">
-              <table className="rfq-table">
-                  {/* 🔥 ADD THIS BLOCK */}
-    <colgroup>
-      <col style={{ width: "60px" }} />      {/* SR NO */}
-      <col />                                {/* DESCRIPTION */}
-      <col />                                {/* CATEGORY */}
-      <col />                                {/* MODEL */}
-      <col style={{ width: "160px" }} />     {/* QTY / UNIT */}
-      <col style={{ width: "90px" }} />      {/* ACTION */}
-    </colgroup>
+            <div className="rfq-grid-wrapper">
+              {/* Header */}
+              <div className="rfq-grid rfq-grid-header">
+                <div>SR. NO</div>
+                <div>ITEM DESCRIPTION *</div>
+                <div>CATEGORY *</div>
+                <div>MODEL / REF</div>
+                <div>QUANTITY / UNIT</div>
+                <div>ACTIONS</div>
+              </div>
 
-    
-                <thead>
-                  <tr>
-                    <th>SR. NO</th>
-                    <th>ITEM DESCRIPTION *</th>
-                    <th>CATEGORY *</th>
-                    <th>MODEL / REF</th>
-                    <th>QUANTITY / UNIT</th>
-                    <th>ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lineItems.map((item, index) => (
-                    <tr key={index}>
-                      <td className="rfq-sr-no">{index + 1}</td>
-                      <td>
-                        <input
-                          placeholder="e.g. Submersible Water Pump"
-                          value={item.description}
-                          onChange={e => updateLineItem(index, 'description', e.target.value)}
-                        />
-                      </td>
-                      <td>
-                        <select 
-                          value={item.category} 
-                          onChange={e => updateLineItem(index, 'category', e.target.value)}
-                        >
-                          <option>Select Category</option>
-                          <option>Bearings & Transmission</option>
-                          <option>Pumps & Motors</option>
-                          <option>Valves & Fittings</option>
-                          <option>Electrical Equipment</option>
-                          <option>Sensors & Controls</option>
-                        </select>
-                      </td>
-                      <td>
-                        <input
-                          placeholder="e.g. XP-500 Series"
-                          value={item.model}
-                          onChange={e => updateLineItem(index, 'model', e.target.value)}
-                        />
-                      </td>
-                      <td className="rfq-qty-cell">
-                        <input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={e => updateLineItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                        />
-                        <select 
-                          value={item.unit} 
-                          onChange={e => updateLineItem(index, 'unit', e.target.value)}
-                        >
-                          <option>SETS</option>
-                          <option>PCS</option>
-                          <option>KG</option>
-                          <option>MTR</option>
-                          <option>UNITS</option>
-                        </select>
-                      </td>
-                      <td className="rfq-action-cell">
-                        <button 
-                          type="button"
-                          onClick={() => duplicateLineItem(index)} 
-                          title="Duplicate"
-                          className="rfq-action-btn"
-                        >
-                          ⧉
-                        </button>
-                        <button 
-                          type="button"
-                          onClick={() => removeLineItem(index)} 
-                          title="Delete"
-                          className="rfq-action-btn rfq-delete-btn"
-                        >
-                          🗑
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {/* Rows */}
+              {lineItems.map((item, index) => (
+                <div className="rfq-grid rfq-grid-row" key={index}>
+                  <div className="rfq-cell rfq-cell--sr" data-label="SR. NO">
+                    {index + 1}
+                  </div>
+
+                  <div className="rfq-cell" data-label="Item Description *">
+                    <input
+                      placeholder="e.g. Submersible Water Pump"
+                      value={item.description}
+                      onChange={e => updateLineItem(index, 'description', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="rfq-cell" data-label="Category *">
+                    <select
+                      value={item.category}
+                      onChange={e => updateLineItem(index, 'category', e.target.value)}
+                    >
+                      <option value="">Select Category</option>
+                      <option>Bearings & Transmission</option>
+                      <option>Pumps & Motors</option>
+                      <option>Valves & Fittings</option>
+                      <option>Electrical Equipment</option>
+                      <option>Sensors & Controls</option>
+                    </select>
+                  </div>
+
+                  <div className="rfq-cell" data-label="Model / Ref">
+                    <input
+                      placeholder="e.g. XP-500 Series"
+                      value={item.model}
+                      onChange={e => updateLineItem(index, 'model', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="rfq-cell rfq-cell--qty" data-label="Quantity / Unit">
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={e =>
+                        updateLineItem(index, 'quantity', parseInt(e.target.value, 10) || 1)
+                      }
+                    />
+                    <select
+                      value={item.unit}
+                      onChange={e => updateLineItem(index, 'unit', e.target.value)}
+                    >
+                      <option>SETS</option>
+                      <option>PCS</option>
+                      <option>KG</option>
+                      <option>MTR</option>
+                      <option>UNITS</option>
+                    </select>
+                  </div>
+
+                  <div className="rfq-cell rfq-cell--actions" data-label="Actions">
+                    <button
+                      type="button"
+                      onClick={() => removeLineItem(index)}
+                      title="Delete"
+                      className="rfq-btn-delete"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
 
             <button 

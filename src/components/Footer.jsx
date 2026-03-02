@@ -20,10 +20,10 @@ const Footer = () => {
           <div className="footer-links">
             <h4>Quick Links</h4>
             <ul>
-              <li><Link to="/">Home</Link></li>
-              <li><Link to="/listings">Listings</Link></li>
-              <li><Link to="/products">Products</Link></li>
-              <li><Link to="/contact">Contact</Link></li>
+              <li><Link to="/" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>Home</Link></li>
+              <li><Link to="/listings" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>Listings</Link></li>
+              <li><Link to="/products" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>Products</Link></li>
+              <li><Link to="/contact" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>Contact</Link></li>
             </ul>
           </div>
           <div className="footer-contact">
