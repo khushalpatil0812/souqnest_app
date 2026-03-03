@@ -9,7 +9,6 @@ import {
 import { useCreateRFQ } from '../../hooks/useRFQs';
 import { productApi } from '../../services/api';
 import { useCart } from '../../context/CartContext';
-import { useCategories } from '../../hooks/useCategories';
 import './RFQForm.css';
 
 const BLOCKED_DOMAINS = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com'];
@@ -39,18 +38,16 @@ const RFQForm = () => {
   // Contact form
   const [formData, setFormData] = useState({
     companyName: '',
-    contactName: '',
+    contactPerson: '',
     email: '',
     phone: '',
     country: '',
-    message: '',
-    categoryId: '',
+    description: '',
+    targetPrice: '',
+    deliveryDate: '',
   });
 
   const createRFQMutation = useCreateRFQ();
-  
-  // Fetch categories
-  const { data: categories = [] } = useCategories();
 
   // Steps configuration
   const steps = [
@@ -154,13 +151,13 @@ const RFQForm = () => {
 
   const fieldErrors = {
     companyName: showValidation && !formData.companyName.trim() ? 'Company name is required.' : '',
-    contactName: showValidation && !formData.contactName.trim() ? 'Contact person is required.' : '',
+    contactPerson: showValidation && !formData.contactPerson.trim() ? 'Contact person is required.' : '',
     email: showValidation && !formData.email.trim() ? 'Corporate email is required.' : emailError,
     phone: showValidation && !formData.phone.trim() ? 'Phone number is required.' : '',
   };
 
   const canProceedToStep2 = cartItems.length > 0;
-  const canProceedToStep3 = formData.companyName && formData.contactName && formData.email && formData.phone && !emailError;
+  const canProceedToStep3 = formData.companyName && formData.contactPerson && formData.email && formData.phone && !emailError;
 
   const handleNextStep = () => {
     if (currentStep === 1 && canProceedToStep2) {
@@ -192,7 +189,7 @@ const RFQForm = () => {
       return;
     }
 
-    if (!formData.companyName || !formData.contactName || !formData.email || !formData.phone) {
+    if (!formData.companyName || !formData.contactPerson || !formData.email || !formData.phone) {
       setCurrentStep(2);
       return;
     }
@@ -203,31 +200,35 @@ const RFQForm = () => {
     }
 
     try {
-      const dataToSend = {
-        companyName: formData.companyName.trim(),
-        contactName: formData.contactName.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim(),
-        country: formData.country.trim() || undefined,
-        message: formData.message.trim() || undefined,
-        categoryId: formData.categoryId || undefined,
-        items: cartItems.map(item => ({
-          productId: item.productId,
+      // Submit each cart item as a separate RFQ (backend spec expects single product per RFQ)
+      const submitPromises = cartItems.map(item => {
+        const dataToSend = {
+          productName: item.productName,
           quantity: item.quantity,
-        })),
-      };
+          companyName: formData.companyName.trim(),
+          contactPerson: formData.contactPerson.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          country: formData.country.trim() || undefined,
+          description: formData.description.trim() || undefined,
+          targetPrice: formData.targetPrice.trim() || undefined,
+          deliveryDate: formData.deliveryDate || undefined,
+        };
+        return createRFQMutation.mutateAsync(dataToSend);
+      });
 
-      await createRFQMutation.mutateAsync(dataToSend);
+      await Promise.all(submitPromises);
       setSubmissionStatus('success');
       setCartItems([]);
       setFormData({
         companyName: '',
-        contactName: '',
+        contactPerson: '',
         email: '',
         phone: '',
         country: '',
-        message: '',
-        categoryId: '',
+        description: '',
+        targetPrice: '',
+        deliveryDate: '',
       });
       setCurrentStep(1);
     } catch (error) {
@@ -573,26 +574,26 @@ const RFQForm = () => {
                   {fieldErrors.companyName && <span id="companyName-error" className="rfq-field-error">{fieldErrors.companyName}</span>}
                 </div>
 
-                <div className={`rfq-field-group ${fieldErrors.contactName ? 'error' : ''}`}>
-                  <label htmlFor="contactName" className="rfq-field-label">
+                <div className={`rfq-field-group ${fieldErrors.contactPerson ? 'error' : ''}`}>
+                  <label htmlFor="contactPerson" className="rfq-field-label">
                     Contact Person <span className="rfq-required-star" aria-hidden="true">*</span>
                   </label>
                   <div className="rfq-input-wrap">
                     <FiUser className="rfq-field-icon" size={18} />
                     <input
                       type="text"
-                      id="contactName"
-                      name="contactName"
-                      value={formData.contactName}
+                      id="contactPerson"
+                      name="contactPerson"
+                      value={formData.contactPerson}
                       onChange={handleChange}
                       required
                       autoComplete="name"
                       aria-required="true"
-                      aria-invalid={Boolean(fieldErrors.contactName)}
-                      aria-describedby={fieldErrors.contactName ? 'contactName-error' : undefined}
+                      aria-invalid={Boolean(fieldErrors.contactPerson)}
+                      aria-describedby={fieldErrors.contactPerson ? 'contactPerson-error' : undefined}
                     />
                   </div>
-                  {fieldErrors.contactName && <span id="contactName-error" className="rfq-field-error">{fieldErrors.contactName}</span>}
+                  {fieldErrors.contactPerson && <span id="contactPerson-error" className="rfq-field-error">{fieldErrors.contactPerson}</span>}
                 </div>
 
                 <div className={`rfq-field-group ${fieldErrors.email ? 'error' : ''}`}>
@@ -654,40 +655,47 @@ const RFQForm = () => {
                   </div>
                 </div>
 
-                <div className="rfq-field-group rfq-field-full">
-                  <label htmlFor="categoryId" className="rfq-field-label">
-                    Product Category / Specification
-                  </label>
-                  <div className="rfq-input-wrap">
-                    <FiLayers className="rfq-field-icon" size={18} />
-                    <select
-                      id="categoryId"
-                      name="categoryId"
-                      value={formData.categoryId}
-                      onChange={handleChange}
-                      className="rfq-select"
-                    >
-                      <option value="">Select a category</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
                 <div className="rfq-field-group rfq-field-full rfq-field-textarea">
-                  <label htmlFor="message" className="rfq-field-label">Additional Requirements</label>
+                  <label htmlFor="description" className="rfq-field-label">Additional Details / Description</label>
                   <div className="rfq-input-wrap">
                     <FiMessageSquare className="rfq-field-icon" size={18} />
                     <textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
+                      id="description"
+                      name="description"
+                      value={formData.description}
                       onChange={handleChange}
                       rows="4"
+                      placeholder="Any additional requirements or specifications..."
                     ></textarea>
+                  </div>
+                </div>
+
+                <div className="rfq-field-group">
+                  <label htmlFor="targetPrice" className="rfq-field-label">Target Price (Optional)</label>
+                  <div className="rfq-input-wrap">
+                    <FiGlobe className="rfq-field-icon" size={18} />
+                    <input
+                      type="text"
+                      id="targetPrice"
+                      name="targetPrice"
+                      value={formData.targetPrice}
+                      onChange={handleChange}
+                      placeholder="e.g. $100"
+                    />
+                  </div>
+                </div>
+
+                <div className="rfq-field-group">
+                  <label htmlFor="deliveryDate" className="rfq-field-label">Required Delivery Date (Optional)</label>
+                  <div className="rfq-input-wrap">
+                    <FiClock className="rfq-field-icon" size={18} />
+                    <input
+                      type="date"
+                      id="deliveryDate"
+                      name="deliveryDate"
+                      value={formData.deliveryDate}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
               </div>
@@ -761,7 +769,7 @@ const RFQForm = () => {
                     </div>
                     <div className="rfq-review-detail">
                       <span>Contact</span>
-                      <strong>{formData.contactName}</strong>
+                      <strong>{formData.contactPerson}</strong>
                     </div>
                     <div className="rfq-review-detail">
                       <span>Email</span>
@@ -777,16 +785,22 @@ const RFQForm = () => {
                         <strong>{formData.country}</strong>
                       </div>
                     )}
-                    {formData.categoryId && (
-                      <div className="rfq-review-detail">
-                        <span>Category</span>
-                        <strong>{categories.find(c => c.id === parseInt(formData.categoryId))?.name || 'N/A'}</strong>
+                    {formData.description && (
+                      <div className="rfq-review-detail rfq-review-detail-full">
+                        <span>Description</span>
+                        <strong>{formData.description}</strong>
                       </div>
                     )}
-                    {formData.message && (
-                      <div className="rfq-review-detail rfq-review-detail-full">
-                        <span>Message</span>
-                        <strong>{formData.message}</strong>
+                    {formData.targetPrice && (
+                      <div className="rfq-review-detail">
+                        <span>Target Price</span>
+                        <strong>{formData.targetPrice}</strong>
+                      </div>
+                    )}
+                    {formData.deliveryDate && (
+                      <div className="rfq-review-detail">
+                        <span>Delivery Date</span>
+                        <strong>{formData.deliveryDate}</strong>
                       </div>
                     )}
                   </div>
