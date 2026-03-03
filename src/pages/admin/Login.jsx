@@ -20,16 +20,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      console.log('Login attempt:', { email });
       const response = await authApi.login({ email, password });
-      console.log('Login response:', response);
       
       // Extract auth data from response
       const authData = extractObject(response);
       const token = authData.token;
       const user = authData.user;
-      
-      console.log('User object:', user); // Add this to debug
       
       if (!user || user.role !== 'SUPER_ADMIN') {
         setError('Access denied. Admin privileges required.');

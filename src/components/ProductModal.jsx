@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FiX, 
-  FiChevronLeft, 
-  FiChevronRight, 
   FiPackage,
   FiTag,
   FiLayers,
@@ -18,32 +16,38 @@ import './ProductModal.css';
 const ProductModal = ({ productSlug, onClose }) => {
   const { data: product, isLoading, error } = useProduct(productSlug);
   const [activeTab, setActiveTab] = useState('overview');
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Close on escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') onClose();
     };
+
+    const scrollY = window.scrollY;
+    const originalBodyStyle = {
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width,
+      overflow: document.body.style.overflow,
+    };
+
     document.addEventListener('keydown', handleEscape);
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
     
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.position = originalBodyStyle.position;
+      document.body.style.top = originalBodyStyle.top;
+      document.body.style.width = originalBodyStyle.width;
+      document.body.style.overflow = originalBodyStyle.overflow;
+      window.scrollTo(0, scrollY);
     };
   }, [onClose]);
 
   // Get all images (main + gallery)
-  const allImages = product ? [product.imageUrl, ...(product.images || [])].filter(Boolean) : [];
-
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
-  };
 
   // Format price with currency symbol
   const formatPrice = (price) => {
@@ -97,9 +101,9 @@ const ProductModal = ({ productSlug, onClose }) => {
               {/* Image Gallery */}
               <div className="product-modal-gallery">
                 <div className="product-modal-image-main">
-                  {allImages.length > 0 ? (
+                  {product.imageUrl ? (
                     <img 
-                      src={allImages[currentImageIndex]} 
+                      src={product.imageUrl} 
                       alt={product.name}
                       loading="lazy"
                       decoding="async"
@@ -114,32 +118,8 @@ const ProductModal = ({ productSlug, onClose }) => {
                     </div>
                   )}
                   
-                  {allImages.length > 1 && (
-                    <>
-                      <button className="gallery-nav prev" onClick={prevImage}>
-                        <FiChevronLeft size={24} />
-                      </button>
-                      <button className="gallery-nav next" onClick={nextImage}>
-                        <FiChevronRight size={24} />
-                      </button>
-                    </>
-                  )}
                 </div>
 
-                {/* Thumbnail Strip */}
-                {allImages.length > 1 && (
-                  <div className="product-modal-thumbnails">
-                    {allImages.map((img, idx) => (
-                      <button
-                        key={idx}
-                        className={`thumbnail ${idx === currentImageIndex ? 'active' : ''}`}
-                        onClick={() => setCurrentImageIndex(idx)}
-                      >
-                        <img src={img} alt={`${product.name} ${idx + 1}`} loading="lazy" decoding="async" />
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Product Info */}

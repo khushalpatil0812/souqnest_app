@@ -15,8 +15,7 @@ import {
   FiSend,
   FiUsers,
   FiCheck,
-  FiStar,
-  FiShield
+  FiStar
 } from 'react-icons/fi';
 import { useSuppliersWithPagination } from '../../hooks/useSuppliers';
 import { useCategories } from '../../hooks/useCategories';
@@ -32,16 +31,22 @@ const Listings = () => {
   const [selectedType, setSelectedType] = useState(searchParams.get('supplierType') || '');
   const [selectedIndustry, setSelectedIndustry] = useState(searchParams.get('industryId') || '');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
-  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 1);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = Number.parseInt(searchParams.get('page') || '1', 10);
+    return Number.isFinite(page) && page > 0 ? page : 1;
+  });
   const ITEMS_PER_PAGE = 12;
+  const serverSortableValues = ['newest', 'oldest'];
   
   // Build API params
   const apiParams = useMemo(() => {
     const params = {
       page: currentPage,
       limit: ITEMS_PER_PAGE,
-      sort: sortBy,
     };
+    if (serverSortableValues.includes(sortBy)) {
+      params.sort = sortBy;
+    }
     if (searchTerm) params.search = searchTerm;
     if (selectedType) params.supplierType = selectedType;
     if (selectedIndustry) params.industryId = selectedIndustry;
@@ -54,7 +59,21 @@ const Listings = () => {
   const { data: industries = [] } = useIndustries();
   
   // Extract suppliers and pagination meta
-  const suppliers = suppliersResponse?.data || [];
+  const suppliersRaw = suppliersResponse?.data || [];
+  const suppliers = useMemo(() => {
+    if (!Array.isArray(suppliersRaw)) return [];
+    if (sortBy === 'a-z') {
+      return [...suppliersRaw].sort((a, b) =>
+        (a?.companyName || '').localeCompare(b?.companyName || '', undefined, { sensitivity: 'base' })
+      );
+    }
+    if (sortBy === 'z-a') {
+      return [...suppliersRaw].sort((a, b) =>
+        (b?.companyName || '').localeCompare(a?.companyName || '', undefined, { sensitivity: 'base' })
+      );
+    }
+    return suppliersRaw;
+  }, [suppliersRaw, sortBy]);
   const meta = suppliersResponse?.meta || { total: 0, page: 1, limit: ITEMS_PER_PAGE, totalPages: 1 };
 
   // Use custom hook to enrich suppliers with industries
@@ -143,11 +162,6 @@ const Listings = () => {
       {/* ===== HERO SECTION (Self-contained) ===== */}
       <header className="listings-hero">
         <div className="listings-hero-content">
-          {/* Breadcrumb Navigation */}
-          <nav className="listings-breadcrumb" aria-label="breadcrumb">
-            <Link to="/">Home</Link> / <span>Suppliers Directory</span>
-          </nav>
-          
           {/* Hero Title */}
           <h1 className="listings-hero-title">
             Find Verified <span>Suppliers</span>
@@ -386,6 +400,26 @@ const Listings = () => {
                           <FiMapPin size={12} />
                           <span>{supplier.location || 'Global'}</span>
                         </div>
+
+                        {/* Star Rating */}
+                        {supplier.rating && (
+                          <div className="slc-rating-section">
+                            <div className="slc-stars">
+                              {[...Array(5)].map((_, i) => (
+                                <FiStar
+                                  key={i}
+                                  size={14}
+                                  className={i < Math.floor(supplier.rating) ? 'star-filled' : (i < supplier.rating ? 'star-half' : 'star-empty')}
+                                />
+                              ))}
+                            </div>
+                            <span className="slc-rating-value">{supplier.rating}</span>
+                            {supplier.reviewCount && (
+                              <span className="slc-review-count">({supplier.reviewCount})</span>
+                            )}
+                          </div>
+                        )}
+
                         {/* Products and Industries under location */}
                         {(supplier.products && supplier.products.length > 0) && (
                           <div style={{ marginTop: 4, fontSize: 13, color: '#444' }}>
@@ -405,43 +439,22 @@ const Listings = () => {
 
                     {/* Right Section - 30% */}
                     <div className="slc-right">
-                      {/* Category Pill replaces Supplier Type */}
-                      <span className="slc-type-pill" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {/* Authorized Partner badge between logo and category name */}
-                        {supplier.isAuthorizedPartner && (
-                          <span className="slc-auth-badge-inline" title="Authorized Partner" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#e8f0fe', color: '#1a73e8', borderRadius: 6, fontWeight: 500, fontSize: 13, padding: '2px 8px' }}>
-                            <FiShield size={15} style={{ color: '#1a73e8' }} />
-                            <span>Authorized Partner</span>
-                          </span>
-                        )}
-                        {/* Category name */}
-                        <span style={{ marginLeft: supplier.isAuthorizedPartner ? 12 : 0, whiteSpace: 'nowrap' }}>
-                          {supplier.category && (supplier.category.name || typeof supplier.category === 'string')
-                            ? (supplier.category.name || supplier.category)
-                            : 'Category'}
-                        </span>
-                      </span>
-
-                      {/* Action Buttons */}
-                      <div className="slc-actions">
-                        <Link to="/contact" className="slc-btn-link">
-                          <button className="slc-btn">Contact</button>
-                        </Link>
-                        {supplier.websiteUrl && (
-                          <a
-                            href={supplier.websiteUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="slc-btn slc-btn-secondary slc-btn-link"
-                            style={{ minWidth: 90, textAlign: 'center' }}
-                          >
-                            View Website
-                          </a>
-                        )}
-                        <Link to={`/rfq?supplier=${supplier.id}`} className="slc-btn-link">
-                          <button className="slc-btn slc-btn-rfq">Submit RFQ</button>
-                        </Link>
-                      </div>
+                      <Link to={`/rfq?supplier=${supplier.id}`} className="slc-btn-link slc-btn slc-btn-contact">
+                        Contact
+                      </Link>
+                      {supplier.websiteUrl && (
+                        <a
+                          href={supplier.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="slc-btn-link slc-btn slc-btn-website"
+                        >
+                          View Website
+                        </a>
+                      )}
+                      <Link to={`/contact?supplier=${supplier.id}`} className="slc-btn-link slc-btn slc-btn-rfq">
+                        Submit RFQ
+                      </Link>
                     </div>
                   </div>
                 </div>

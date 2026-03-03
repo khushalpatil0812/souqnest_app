@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fi';
 import { FiFacebook, FiTwitter, FiLinkedin, FiInstagram } from 'react-icons/fi';
 import { enquiryApi } from '../../services/api';
+import { useCategories } from '../../hooks/useCategories';
 import './Contact.css';
 
 const ENQUIRY_TYPES = [
@@ -29,6 +30,9 @@ const Contact = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
+  
+  // Fetch categories
+  const { data: categories = [] } = useCategories();
   
   const [formData, setFormData] = useState({
     companyName: '',
@@ -182,19 +186,8 @@ const Contact = () => {
           <div>
             <h1 className="rfq-title">Request for Quotation (RFQ)</h1>
             <p className="rfq-subtitle">
-              Please fill out this RFQ form and our team will get back to you with a quotation.
+              Please fill out this form and our team will get back to you with a quotation.
             </p>
-          </div>
-        </div>
-        <div className="rfq-meta-badge">
-          <div className="rfq-meta-item">
-            <span className="rfq-meta-label">RESPONSE TIME</span>
-            <span className="rfq-meta-value">24-48 HRS</span>
-          </div>
-          <div className="rfq-meta-divider" />
-          <div className="rfq-meta-item">
-            <span className="rfq-meta-label">SUPPORT</span>
-            <span className="rfq-meta-value rfq-meta-blue">🌐 24/7</span>
           </div>
         </div>
       </div>
@@ -328,11 +321,11 @@ const Contact = () => {
                       onChange={e => updateLineItem(index, 'category', e.target.value)}
                     >
                       <option value="">Select Category</option>
-                      <option>Bearings & Transmission</option>
-                      <option>Pumps & Motors</option>
-                      <option>Valves & Fittings</option>
-                      <option>Electrical Equipment</option>
-                      <option>Sensors & Controls</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -410,7 +403,7 @@ const Contact = () => {
             {/* Attachments */}
             <div className="rfq-section rfq-attachments">
               <div className="rfq-section-label">
-                📎 ATTACHMENTS (Optional)
+                📎 Upload Files
               </div>
               <div 
                 className="rfq-dropzone"
@@ -427,8 +420,8 @@ const Contact = () => {
                   onChange={handleFileChange}
                 />
                 <div className="rfq-dropzone-icon">☁️</div>
-                <p>DROP FILES HERE OR CLICK TO UPLOAD</p>
-                <span>(PDF, DOC, JPG, XLS — MAX 10MB)</span>
+                <p>Drop files here or click to upload</p>
+                <span>(PDF, DOC, JPG, XLS — Max 10MB)</span>
               </div>
               {attachments.map((f, i) => (
                 <div key={f.id} className="rfq-file-item">

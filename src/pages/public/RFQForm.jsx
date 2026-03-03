@@ -4,11 +4,12 @@ import {
   FiCheckCircle, FiAlertCircle, FiPlus, FiTrash2, FiShoppingCart, 
   FiSearch, FiUser, FiMail, FiPhone, FiGlobe, FiMessageSquare,
   FiPackage, FiSend, FiShield, FiClock, FiAward, FiChevronDown,
-  FiX, FiCheck, FiInfo, FiBriefcase
+  FiX, FiCheck, FiInfo, FiBriefcase, FiLayers
 } from 'react-icons/fi';
 import { useCreateRFQ } from '../../hooks/useRFQs';
 import { productApi } from '../../services/api';
 import { useCart } from '../../context/CartContext';
+import { useCategories } from '../../hooks/useCategories';
 import './RFQForm.css';
 
 const BLOCKED_DOMAINS = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com'];
@@ -43,9 +44,13 @@ const RFQForm = () => {
     phone: '',
     country: '',
     message: '',
+    categoryId: '',
   });
 
   const createRFQMutation = useCreateRFQ();
+  
+  // Fetch categories
+  const { data: categories = [] } = useCategories();
 
   // Steps configuration
   const steps = [
@@ -205,6 +210,7 @@ const RFQForm = () => {
         phone: formData.phone.trim(),
         country: formData.country.trim() || undefined,
         message: formData.message.trim() || undefined,
+        categoryId: formData.categoryId || undefined,
         items: cartItems.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -221,6 +227,7 @@ const RFQForm = () => {
         phone: '',
         country: '',
         message: '',
+        categoryId: '',
       });
       setCurrentStep(1);
     } catch (error) {
@@ -258,10 +265,6 @@ const RFQForm = () => {
             Select products, provide your details, and receive competitive quotes from verified suppliers
           </p>
           <div className="rfq-hero-stats">
-            <div className="rfq-hero-stat">
-              <FiClock size={16} />
-              <span>Response within 24hrs</span>
-            </div>
             <div className="rfq-hero-stat">
               <FiAward size={16} />
               <span>Best Price Guarantee</span>
@@ -651,6 +654,29 @@ const RFQForm = () => {
                   </div>
                 </div>
 
+                <div className="rfq-field-group rfq-field-full">
+                  <label htmlFor="categoryId" className="rfq-field-label">
+                    Product Category / Specification
+                  </label>
+                  <div className="rfq-input-wrap">
+                    <FiLayers className="rfq-field-icon" size={18} />
+                    <select
+                      id="categoryId"
+                      name="categoryId"
+                      value={formData.categoryId}
+                      onChange={handleChange}
+                      className="rfq-select"
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
                 <div className="rfq-field-group rfq-field-full rfq-field-textarea">
                   <label htmlFor="message" className="rfq-field-label">Additional Requirements</label>
                   <div className="rfq-input-wrap">
@@ -751,6 +777,12 @@ const RFQForm = () => {
                         <strong>{formData.country}</strong>
                       </div>
                     )}
+                    {formData.categoryId && (
+                      <div className="rfq-review-detail">
+                        <span>Category</span>
+                        <strong>{categories.find(c => c.id === parseInt(formData.categoryId))?.name || 'N/A'}</strong>
+                      </div>
+                    )}
                     {formData.message && (
                       <div className="rfq-review-detail rfq-review-detail-full">
                         <span>Message</span>
@@ -804,10 +836,6 @@ const RFQForm = () => {
           <div className="rfq-trust-item">
             <FiShield size={20} />
             <span>SSL Secured</span>
-          </div>
-          <div className="rfq-trust-item">
-            <FiClock size={20} />
-            <span>24hr Response</span>
           </div>
           <div className="rfq-trust-item">
             <FiAward size={20} />

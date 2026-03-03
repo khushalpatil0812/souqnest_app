@@ -54,8 +54,6 @@ const Industries = () => {
       if (formData.icon && formData.icon.trim()) {
         submitData.icon = formData.icon.trim();
       }
-
-      console.log('Submitting industry:', submitData);
       
       if (editMode) {
         await updateIndustryMutation.mutateAsync({ id: selectedIndustryId, data: submitData });

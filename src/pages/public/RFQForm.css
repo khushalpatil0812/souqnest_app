@@ -50,8 +50,8 @@
   border: 2px solid #1E40AF;
   border-radius: 100px;
   padding: 8px 16px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
   font-weight: 600;
   color: #1E3A8A;
   text-transform: uppercase;
@@ -60,8 +60,8 @@
 }
 
 .rfq-hero-title {
-  font-family: 'Fraunces', serif;
-  font-size: clamp(32px, 5vw, 52px);
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3.25rem);
   font-weight: 700;
   color: #1F2937;
   line-height: 1.15;
@@ -77,8 +77,8 @@
 }
 
 .rfq-hero-subtitle {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 17px;
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.6vw, 1.125rem);
   line-height: 1.7;
   color: #374151;
   max-width: 600px;
@@ -99,7 +99,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   color: #6B7280;
 }
@@ -163,7 +163,7 @@
 }
 
 .rfq-success-modal h2 {
-  font-family: 'Fraunces', serif;
+  font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 700;
   color: #0F172A;
@@ -171,7 +171,7 @@
 }
 
 .rfq-success-modal p {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   color: #64748B;
   line-height: 1.6;
@@ -195,7 +195,7 @@
   gap: 12px;
   padding: 14px 20px;
   border-radius: 12px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
   z-index: 101;
@@ -264,7 +264,7 @@
 }
 
 .rfq-step-label {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
   color: #94A3B8;
@@ -354,17 +354,18 @@
 }
 
 .rfq-form-header h2 {
-  font-family: 'Fraunces', serif;
-  font-size: 22px;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.375rem, 3vw, 1.75rem);
   font-weight: 700;
   color: #0F172A;
   margin-bottom: 4px;
 }
 
 .rfq-form-header p {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
   color: #64748B;
+  line-height: 1.5;
 }
 
 /* ====== PRODUCT SEARCH ====== */
@@ -389,7 +390,7 @@
 .rfq-product-search input {
   width: 100%;
   padding: 16px 48px 16px 48px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   color: #0F172A;
   background: #F8FAFC;
@@ -493,7 +494,7 @@
 
 .rfq-product-option-name {
   display: block;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   color: #0F172A;
@@ -504,7 +505,7 @@
 }
 
 .rfq-product-option-category {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   color: #64748B;
 }
@@ -525,7 +526,7 @@
 }
 
 .rfq-product-empty span {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
 }
 
@@ -543,7 +544,7 @@
   padding: 14px 16px;
   background: linear-gradient(135deg, #ECFEFF 0%, #F0FDFA 100%);
   border-bottom: 1px solid #E2E8F0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   color: #1E40AF;
@@ -602,7 +603,7 @@
 
 .rfq-cart-item-name {
   display: block;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   color: #0F172A;
@@ -613,7 +614,7 @@
 }
 
 .rfq-cart-item-idx {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   color: #94A3B8;
 }
@@ -632,7 +633,7 @@
   height: 32px;
   background: transparent;
   border: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   font-weight: 600;
   color: #64748B;
@@ -655,7 +656,7 @@
   height: 32px;
   background: transparent;
   border: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   color: #0F172A;
@@ -704,7 +705,7 @@
 }
 
 .rfq-cart-empty h3 {
-  font-family: 'Fraunces', serif;
+  font-family: 'Playfair Display', serif;
   font-size: 18px;
   font-weight: 600;
   color: #64748B;
@@ -712,7 +713,7 @@
 }
 
 .rfq-cart-empty p {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   color: #94A3B8;
   margin-bottom: 20px;
@@ -751,8 +752,8 @@
 }
 
 .rfq-notice span {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
   color: #9A3412;
   line-height: 1.5;
 }
@@ -766,7 +767,7 @@
 
 .rfq-required-note {
   margin-bottom: 18px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   color: #64748B;
 }
@@ -790,8 +791,8 @@
 }
 
 .rfq-field-label {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
   font-weight: 600;
   color: #334155;
   line-height: 1.4;
@@ -816,7 +817,7 @@
 .rfq-field textarea {
   width: 100%;
   padding: 16px 14px 16px 44px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   color: #0F172A;
   background: #FFFFFF;
@@ -827,11 +828,12 @@
 }
 
 .rfq-input-wrap input,
-.rfq-input-wrap textarea {
+.rfq-input-wrap textarea,
+.rfq-input-wrap select {
   width: 100%;
   padding: 13px 14px 13px 44px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
   color: #0F172A;
   background: #FFFFFF;
   border: 2px solid #E2E8F0;
@@ -841,16 +843,35 @@
 }
 
 .rfq-field input:focus,
-.rfq-field textarea:focus {
+.rfq-field textarea:focus,
+.rfq-field select:focus {
   border-color: #1E40AF;
   box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
 .rfq-input-wrap input:focus,
-.rfq-input-wrap textarea:focus {
+.rfq-input-wrap textarea:focus,
+.rfq-input-wrap select:focus {
   border-color: #1E40AF;
   background: #FFFFFF;
   box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.rfq-input-wrap select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 18px;
+  padding-right: 44px !important;
+}
+
+
+.rfq-input-wrap select option {
+  color: #0F172A;
+  background: #FFFFFF;
+  padding: 8px 12px;
 }
 
 .rfq-input-wrap:focus-within .rfq-field-icon {
@@ -883,7 +904,7 @@
 
 .rfq-field-error {
   display: block;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 500;
   color: #DC2626;
@@ -912,7 +933,7 @@
   justify-content: center;
   gap: 10px;
   padding: 14px 28px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 600;
   border-radius: 12px;
@@ -1008,7 +1029,7 @@
   gap: 10px;
   padding: 14px 16px;
   background: #F1F5F9;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   color: #475569;
@@ -1022,7 +1043,7 @@
   margin-left: auto;
   background: none;
   border: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
   color: #1E40AF;
@@ -1043,7 +1064,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
 }
 
@@ -1078,7 +1099,7 @@
 
 .rfq-review-detail span {
   display: block;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -1088,7 +1109,7 @@
 }
 
 .rfq-review-detail strong {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
   color: #0F172A;
@@ -1096,7 +1117,7 @@
 
 /* ====== TERMS ====== */
 .rfq-terms {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   color: #64748B;
   line-height: 1.6;
@@ -1126,7 +1147,7 @@
   background: #FEF2F2;
   border: 1px solid #FECACA;
   border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   color: #B91C1C;
@@ -1146,7 +1167,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   color: #64748B;
 }
@@ -1311,3 +1332,5 @@
     margin: 0 4px;
   }
 }
+
+

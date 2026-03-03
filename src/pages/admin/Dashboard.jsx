@@ -43,11 +43,9 @@ const Dashboard = () => {
       ]);
 
       // Extract metrics (object) - handles { data: {...} } or flat object
-      console.log('Dashboard metrics raw:', metricsRes);
       setMetrics(extractObject(metricsRes, {}));
       
       // Extract product popularity - handle various response shapes
-      console.log('Product popularity raw:', popularityRes);
       let popData = extractArray(popularityRes);
       // If the response was an object with a nested key we didn't match, try all keys
       if (popData.length === 0 && popularityRes && typeof popularityRes === 'object') {
@@ -62,23 +60,14 @@ const Dashboard = () => {
       setProductPopularity(popData);
 
       // RFQ analytics is an object with pending/responded counts
-      console.log('RFQ analytics raw:', analyticsRes);
       setRfqAnalytics(extractObject(analyticsRes, {}));
 
       // Extract list data - no limit param so we get all items for counting
-      console.log('Suppliers raw:', suppliersRes);
-      console.log('Products raw:', productsRes);
-      console.log('Categories raw:', categoriesRes);
-      console.log('Industries raw:', industriesRes);
-      console.log('RFQs raw:', rfqsRes);
-
       const allRfqs = extractArray(rfqsRes);
       const allSuppliers = extractArray(suppliersRes);
       const allProducts = extractArray(productsRes);
       const allCategories = extractArray(categoriesRes);
       const allIndustries = extractArray(industriesRes);
-
-      console.log('Extracted - suppliers:', allSuppliers.length, 'products:', allProducts.length, 'categories:', allCategories.length, 'industries:', allIndustries.length, 'rfqs:', allRfqs.length);
 
       setRecentRFQs(allRfqs.slice(0, 5));
       setRecentSuppliers(allSuppliers.slice(0, 5));

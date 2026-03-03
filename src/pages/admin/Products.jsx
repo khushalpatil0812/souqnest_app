@@ -49,9 +49,7 @@ const Products = () => {
     try {
       setLoading(true);
       const response = await productApi.getAll();
-      console.log('Admin Products raw response:', response);
       const extracted = extractArray(response);
-      console.log('Admin Products extracted:', extracted.length, 'items');
       setProducts(extracted);
       setError('');
     } catch (err) {
@@ -147,7 +145,6 @@ const Products = () => {
         const createRes = await productApi.create(dataToSend);
         // Extract created product ID from response
         productId = createRes?.id || createRes?.data?.id || createRes?._id || createRes?.data?._id;
-        console.log('Created product ID:', productId);
       }
 
       // Save specifications, features, and FAQs if product ID is available
@@ -256,7 +253,6 @@ const Products = () => {
       alert('Cannot delete: Product ID is missing');
       return;
     }
-    console.log('Attempting to delete product with ID:', id);
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await productApi.delete(id);

@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiUsers, FiGlobe, FiTrendingUp, FiAward, FiArrowRight, FiArrowLeft, FiCheck, FiSearch, FiMapPin, FiPackage, FiExternalLink, FiShield, FiZap, FiLayers } from 'react-icons/fi';
+import { FiUsers, FiGlobe, FiTrendingUp, FiAward, FiArrowRight, FiArrowLeft, FiCheck, FiSearch, FiMapPin, FiPackage, FiExternalLink, FiShield, FiZap, FiLayers, FiStar } from 'react-icons/fi';
 import { useCategories } from '../../hooks/useCategories';
 import { useSuppliers } from '../../hooks/useSuppliers';
 import { useProducts } from '../../hooks/useProducts';
 import { useSupplierEnrichment } from '../../hooks/useSupplierEnrichment';
+import ProductModal from '../../components/ProductModal';
 import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProductSlug, setSelectedProductSlug] = useState(null);
   const suppliersScrollRef = useRef(null);
   
   // Navbar scroll shrink effect
@@ -136,6 +138,25 @@ const Home = () => {
               {supplier.location || supplier.address || 'Global'}
             </div>
 
+            {/* Star Rating and Reviews */}
+            {supplier.rating && (
+              <div className="supplier-rating-section">
+                <div className="supplier-stars">
+                  {[...Array(5)].map((_, i) => (
+                    <FiStar
+                      key={i}
+                      size={14}
+                      className={i < Math.floor(supplier.rating) ? 'star-filled' : (i < supplier.rating ? 'star-half' : 'star-empty')}
+                    />
+                  ))}
+                  <span className="supplier-rating-value">{supplier.rating}</span>
+                </div>
+                {supplier.reviewCount && (
+                  <span className="supplier-review-count">({supplier.reviewCount} reviews)</span>
+                )}
+              </div>
+            )}
+
             <p className="supplier-desc">
               {(supplier.description || supplier.businessDescription || 'Verified supplier with quality products and competitive pricing.').slice(0, 100)}...
             </p>
@@ -187,6 +208,14 @@ const Home = () => {
     if (searchTerm.trim()) {
       navigate(`/listings?search=${encodeURIComponent(searchTerm.trim())}`);
     }
+  };
+
+  const handleOpenProductView = (slug) => {
+    setSelectedProductSlug(slug);
+  };
+
+  const handleCloseProductView = () => {
+    setSelectedProductSlug(null);
   };
 
   // Get category icon (fallback for categories without icons)
@@ -401,65 +430,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="featured-products-section section home-section-block">
-        <div className="container home-section-container">
-          <div className="category-section-header">
-            <div className="section-label">FEATURED PRODUCTS</div>
-            <h2 className="section-title">Curated High-Demand Products</h2>
-            <p className="section-subtitle">Explore top products from trusted suppliers, selected for quality and relevance.</p>
-          </div>
-
-          {productsLoading && (
-            <div className="home-featured-products-grid">
-              {[...Array(6)].map((_, index) => (
-                <div key={index} className="home-product-card skeleton"></div>
-              ))}
-            </div>
-          )}
-
-          {!productsLoading && featuredProducts.length > 0 && (
-            <div className="home-featured-products-grid">
-              {featuredProducts.map((product) => (
-                <Link key={product.id} to={`/products/${product.slug}`} className="home-product-link">
-                  <article className="home-product-card">
-                    <div className="home-product-image-wrap">
-                      {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.name} className="home-product-image" loading="lazy" decoding="async" />
-                      ) : (
-                        <div className="home-product-image home-product-image-fallback">
-                          <FiPackage size={24} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="home-product-content">
-                      <p className="home-product-category">{product.category?.name || 'General'}</p>
-                      <h3 className="home-product-name">{product.name}</h3>
-                      <p className="home-product-overview">
-                        {(product.overview || 'Quality product from verified supplier.').slice(0, 95)}
-                        {(product.overview || '').length > 95 ? '...' : ''}
-                      </p>
-                      <div className="home-product-cta">
-                        <span>View Details</span>
-                        <FiArrowRight size={14} />
-                      </div>
-                    </div>
-                  </article>
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {!productsLoading && featuredProducts.length === 0 && (
-            <div className="empty-state">
-              <div className="empty-state-icon">📦</div>
-              <h3 className="empty-state-title">No Featured Products Yet</h3>
-              <p className="empty-state-desc">Products are being updated. Please check back soon.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* Suppliers Section */}
       <section className="suppliers-section section home-section-block">
         <div className="container home-section-container">
@@ -507,6 +477,75 @@ const Home = () => {
           )}
         </div>
       </section>
+      
+      {/* Featured Products Section */}
+      <section className="featured-products-section section home-section-block">
+        <div className="container home-section-container">
+          <div className="category-section-header">
+            <div className="section-label">FEATURED PRODUCTS</div>
+            <h2 className="section-title">Curated High-Demand Products</h2>
+            <p className="section-subtitle">Explore top products from trusted suppliers, selected for quality and relevance.</p>
+          </div>
+
+          {productsLoading && (
+            <div className="home-featured-products-grid">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="home-product-card skeleton"></div>
+              ))}
+            </div>
+          )}
+
+          {!productsLoading && featuredProducts.length > 0 && (
+            <div className="home-featured-products-grid">
+              {featuredProducts.map((product) => (
+                <article
+                  key={product.id}
+                  className="home-product-card home-product-link"
+                  onClick={() => handleOpenProductView(product.slug)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleOpenProductView(product.slug);
+                    }
+                  }}
+                >
+                    <div className="home-product-image-wrap">
+                      {product.imageUrl ? (
+                        <img src={product.imageUrl} alt={product.name} className="home-product-image" loading="lazy" decoding="async" />
+                      ) : (
+                        <div className="home-product-image home-product-image-fallback">
+                          <FiPackage size={24} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="home-product-content">
+                      <p className="home-product-category">{product.category?.name || 'General'}</p>
+                      <h3 className="home-product-name">{product.name}</h3>
+                      <p className="home-product-overview">
+                        {(product.overview || 'Quality product from verified supplier.').slice(0, 95)}
+                        {(product.overview || '').length > 95 ? '...' : ''}
+                      </p>
+                      <div className="home-product-cta">
+                        <span>Quick View</span>
+                        <FiArrowRight size={14} />
+                      </div>
+                    </div>
+                  </article>
+              ))}
+            </div>
+          )}
+
+          {!productsLoading && featuredProducts.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon">📦</div>
+              <h3 className="empty-state-title">No Featured Products Yet</h3>
+              <p className="empty-state-desc">Products are being updated. Please check back soon.</p>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* CTA Banner */}
       <section className="cta-banner section home-section-block">
@@ -532,7 +571,7 @@ const Home = () => {
                   </button>
                 </Link>
                 <Link to="/rfq">
-                  <button className="btn-ghost btn-lg">
+                  <button className="btn-primary btn-lg">
                     Submit RFQ
                   </button>
                 </Link>
@@ -541,6 +580,10 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {selectedProductSlug && (
+        <ProductModal productSlug={selectedProductSlug} onClose={handleCloseProductView} />
+      )}
     </div>
   );
 };

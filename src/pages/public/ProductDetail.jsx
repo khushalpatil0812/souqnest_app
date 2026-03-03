@@ -4,8 +4,6 @@ import {
   FiArrowLeft, 
   FiShoppingCart,
   FiSend,
-  FiChevronLeft,
-  FiChevronRight,
   FiCheck,
   FiPackage,
   FiTag,
@@ -23,7 +21,6 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('overview');
   const [showImageModal, setShowImageModal] = useState(false);
@@ -66,8 +63,8 @@ const ProductDetail = () => {
     );
   }
 
-  // Product images
-  const allImages = [product.imageUrl, ...(product.images || [])].filter(Boolean);
+  // Product images - show only main image
+  const productImage = product?.imageUrl;
   
   // Get price
   const formatPrice = (prices) => {
@@ -95,15 +92,6 @@ const ProductDetail = () => {
     setTimeout(() => setAddedToCart(false), 2000);
   };
 
-  // Image navigation
-  const nextImage = () => {
-    setSelectedImageIndex((prev) => (prev + 1) % allImages.length);
-  };
-
-  const prevImage = () => {
-    setSelectedImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
-  };
-
   // Tabs
   const tabs = [
     { id: 'overview', label: 'Overview', icon: FiPackage },
@@ -117,15 +105,6 @@ const ProductDetail = () => {
       {/* Hero Section with Breadcrumb */}
       <section className="product-detail-hero">
         <div className="product-detail-hero-content">
-          <nav className="product-detail-breadcrumb">
-            <Link to="/">Home</Link> / 
-            <Link to="/products">Products</Link> / 
-            {product.category && (
-              <><Link to={`/products?categoryId=${product.category.id}`}>{product.category.name}</Link> / </>
-            )}
-            <span>{product.name}</span>
-          </nav>
-          
           <button onClick={() => navigate(-1)} className="product-detail-back-btn">
             <FiArrowLeft size={18} />
             Back to Products
@@ -140,9 +119,9 @@ const ProductDetail = () => {
             {/* Image Gallery */}
             <div className="product-detail-gallery">
               <div className="product-detail-main-image" onClick={() => setShowImageModal(true)}>
-                {allImages.length > 0 ? (
+                {productImage ? (
                   <img 
-                    src={allImages[selectedImageIndex]} 
+                    src={productImage} 
                     alt={product.name}
                     fetchPriority="high"
                     decoding="async"
@@ -156,37 +135,7 @@ const ProductDetail = () => {
                     <span>No Image Available</span>
                   </div>
                 )}
-                
-                {allImages.length > 1 && (
-                  <>
-                    <button className="gallery-nav-btn prev" onClick={(e) => { e.stopPropagation(); prevImage(); }}>
-                      <FiChevronLeft size={24} />
-                    </button>
-                    <button className="gallery-nav-btn next" onClick={(e) => { e.stopPropagation(); nextImage(); }}>
-                      <FiChevronRight size={24} />
-                    </button>
-                  </>
-                )}
-                
-                <div className="image-counter">
-                  {selectedImageIndex + 1} / {allImages.length || 1}
-                </div>
               </div>
-
-              {/* Thumbnails */}
-              {allImages.length > 1 && (
-                <div className="product-detail-thumbnails">
-                  {allImages.map((img, idx) => (
-                    <button
-                      key={idx}
-                      className={`thumbnail-btn ${idx === selectedImageIndex ? 'active' : ''}`}
-                      onClick={() => setSelectedImageIndex(idx)}
-                    >
-                      <img src={img} alt={`${product.name} ${idx + 1}`} loading="lazy" decoding="async" />
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Product Info */}
@@ -432,9 +381,9 @@ const ProductDetail = () => {
               <FiX size={24} />
             </button>
             
-            {allImages.length > 0 && (
+            {productImage && (
               <img 
-                src={allImages[selectedImageIndex]} 
+                src={productImage} 
                 alt={product.name}
                 className="modal-image"
                 loading="lazy"
@@ -442,16 +391,6 @@ const ProductDetail = () => {
               />
             )}
             
-            {allImages.length > 1 && (
-              <>
-                <button className="modal-nav prev" onClick={prevImage}>
-                  <FiChevronLeft size={32} />
-                </button>
-                <button className="modal-nav next" onClick={nextImage}>
-                  <FiChevronRight size={32} />
-                </button>
-              </>
-            )}
           </div>
         </div>
       )}

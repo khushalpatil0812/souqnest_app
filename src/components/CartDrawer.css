@@ -90,7 +90,7 @@
 }
 
 .cart-modal-title {
-  font-family: 'Fraunces', serif;
+  font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: #0F172A;
@@ -98,7 +98,7 @@
 }
 
 .cart-modal-count {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   color: #64748B;
   margin: 4px 0 0;
@@ -143,7 +143,7 @@
 }
 
 .cart-modal-empty h3 {
-  font-family: 'Fraunces', serif;
+  font-family: 'Playfair Display', serif;
   font-size: 1.25rem;
   font-weight: 600;
   color: #334155;
@@ -151,7 +151,7 @@
 }
 
 .cart-modal-empty p {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   margin: 0 0 24px;
 }
@@ -161,7 +161,7 @@
   background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
   border: none;
   border-radius: 12px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 600;
   color: #FFFFFF;
@@ -228,7 +228,7 @@
 
 .cart-item-category {
   display: block;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.6875rem;
   font-weight: 600;
   color: #1E40AF;
@@ -238,7 +238,7 @@
 }
 
 .cart-item-name {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 600;
   color: #0F172A;
@@ -249,7 +249,7 @@
 }
 
 .cart-item-price {
-  font-family: 'Fraunces', serif;
+  font-family: 'Playfair Display', serif;
   font-size: 1.125rem;
   font-weight: 600;
   color: #1E40AF;
@@ -297,7 +297,7 @@
 .quantity-control span {
   width: 40px;
   text-align: center;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 700;
   color: #0F172A;
@@ -336,7 +336,7 @@
   border: 1px solid #A7F3D0;
   border-radius: 12px;
   margin-top: 16px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 600;
   color: #059669;
@@ -348,7 +348,7 @@
   border: 1px solid #FECACA;
   border-radius: 12px;
   margin-top: 16px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   color: #DC2626;
 }
@@ -374,14 +374,14 @@
 }
 
 .cart-modal-total .total-label {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 500;
   color: #64748B;
 }
 
 .cart-modal-total .total-amount {
-  font-family: 'Fraunces', serif;
+  font-family: 'Playfair Display', serif;
   font-size: 1.75rem;
   font-weight: 700;
   color: #1E40AF;
@@ -389,7 +389,7 @@
 
 .cart-modal-total .total-note {
   display: block;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.75rem;
   color: #94A3B8;
   text-align: right;
@@ -410,7 +410,7 @@
   background: #F1F5F9;
   border: 2px solid #E2E8F0;
   border-radius: 12px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 600;
   color: #64748B;
@@ -433,7 +433,7 @@
   background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
   border: none;
   border-radius: 12px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 700;
   color: #FFFFFF;
@@ -467,7 +467,7 @@
 .cart-footer-note {
   margin-top: 16px;
   text-align: center;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.8125rem;
   color: #94A3B8;
 }
@@ -637,3 +637,5 @@
     padding: 14px 20px;
   }
 }
+
+

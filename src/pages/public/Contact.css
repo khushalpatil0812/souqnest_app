@@ -37,14 +37,16 @@
 }
 
 .rfq-title {
-  font-size: 1.4rem;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.375rem, 3vw, 1.75rem);
   font-weight: 700;
   color: #0f172a;
 }
 
 .rfq-subtitle {
-  font-size: 0.85rem;
+  font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
   color: #64748b;
+  line-height: 1.5;
 }
 
 /* ===== META BADGE ===== */
@@ -100,17 +102,25 @@
 }
 
 .rfq-field-group label {
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   color: #64748b;
   font-weight: 600;
 }
 
 .rfq-field-group input,
 .rfq-field-group select {
-  padding: 10px;
+  padding: 11px 14px;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
-  font-size: 0.85rem;
+  font-size: 0.9375rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.rfq-field-group input:focus,
+.rfq-field-group select:focus {
+  border-color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+  outline: none;
 }
 
 /* ===== INFO TIP ===== */
@@ -118,10 +128,11 @@
   grid-column: span 3;
   background: #f0f9ff;
   border: 1px solid #bae6fd;
-  padding: 10px;
+  padding: 12px 14px;
   border-radius: 8px;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: #0369a1;
+  line-height: 1.5;
 }
 
 /* ===== GRID-BASED PROCUREMENT TABLE ===== */
@@ -145,12 +156,12 @@
 }
 
 .rfq-grid-header {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 10px 12px;
+  padding: 12px;
   border-bottom: 1px solid #e5e7eb;
   background: #f8fafc;
 }
@@ -171,7 +182,7 @@
 }
 
 .rfq-cell {
-  font-size: 0.85rem;
+  font-size: 0.9375rem;
 }
 
 .rfq-cell--sr {
@@ -184,15 +195,16 @@
   width: 100%;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
-  padding: 8px 10px;
-  font-size: 0.85rem;
+  padding: 9px 12px;
+  font-size: 0.9375rem;
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .rfq-grid-row input:focus,
 .rfq-grid-row select:focus {
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+  border-color: #1e40af;
+  box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1);
 }
 
 .rfq-cell--qty {
@@ -216,12 +228,12 @@
 }
 
 .rfq-btn-delete {
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 999px;
   border: 1px solid #fecaca;
   background: #fef2f2;
   color: #b91c1c;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
@@ -314,25 +326,54 @@
 }
 
 .rfq-section-label {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  color: #334155;
 }
 
 .rfq-remarks textarea {
   width: 100%;
   min-height: 120px;
-  padding: 10px;
+  padding: 12px 14px;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  line-height: 1.6;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.rfq-remarks textarea:focus {
+  border-color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+  outline: none;
 }
 
 .rfq-dropzone {
   border: 2px dashed #cbd5e1;
-  padding: 20px;
+  padding: 24px 20px;
   text-align: center;
   border-radius: 10px;
   cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.rfq-dropzone:hover {
+  border-color: #1e40af;
+  background: #f8fafc;
+}
+
+.rfq-dropzone p {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #334155;
+  margin: 8px 0 4px;
+}
+
+.rfq-dropzone span {
+  font-size: 0.8125rem;
+  color: #64748b;
 }
 
 /* ===== FILE LIST ===== */
@@ -355,11 +396,14 @@
 
 /* Add margin above the submit button for spacing from form */
 .rfq-footer button {
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 13px 24px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
   margin-top: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
 /* Make discard changes button blue */
@@ -367,17 +411,30 @@
   background: #1e40af;
   color: #fff;
   border: 1px solid #1e40af;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, transform 0.1s;
 }
 .rfq-discard-btn:hover {
   background: #2563eb;
   border-color: #2563eb;
   color: #fff;
+  transform: translateY(-1px);
 }
 
 .rfq-submit-btn {
-  background: #1e40af;
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+}
+
+.rfq-submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(30, 64, 175, 0.35);
+}
+
+.rfq-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* ===== SUCCESS MODAL ===== */
@@ -460,3 +517,4 @@
     min-width: 650px;
   }
 }
+

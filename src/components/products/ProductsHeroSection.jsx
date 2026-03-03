@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { FiSearch } from 'react-icons/fi';
 
 const ProductsHeroSection = ({
@@ -11,10 +10,6 @@ const ProductsHeroSection = ({
 }) => {
   return (
     <>
-      <nav className="products-breadcrumb">
-        <Link to="/">Home</Link> / <span>Products</span>
-      </nav>
-
       <h1 id="products-hero-title" className="products-hero-title">
         Explore Our <span>Products</span>
       </h1>

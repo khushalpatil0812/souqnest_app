@@ -12,6 +12,7 @@ const Listings = lazy(() => import('../pages/public/Listings'));
 // const Blogs = lazy(() => import('../pages/public/Blogs')); // Kept for future use
 const Contact = lazy(() => import('../pages/public/Contact'));
 const RFQForm = lazy(() => import('../pages/public/RFQForm'));
+const NotFound = lazy(() => import('../pages/public/NotFound.jsx'));
 
 // Admin Pages (lazy loaded)
 const AdminLogin = lazy(() => import('../pages/admin/Login'));
@@ -46,6 +47,7 @@ const AppRoutes = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/rfq" element={<RFQForm />} />
         <Route path="/become-partner" element={<Navigate to="/contact" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
 
       {/* Admin Login (no layout) */}
@@ -65,6 +67,8 @@ const AppRoutes = () => {
         <Route path="/admin/rfqs" element={<AdminRFQs />} />
         {/* <Route path="/admin/settings" element={<AdminSettings />} /> */}
       </Route>
+
+      <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
       </Routes>
     </Suspense>
   );

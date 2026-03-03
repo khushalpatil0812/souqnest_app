@@ -37,7 +37,6 @@ const Categories = () => {
     try {
       setLoading(true);
       const response = await categoryApi.getAll();
-      console.log('Categories fetched:', response);
       setCategories(extractArray(response));
       setError(null);
     } catch (err) {
@@ -51,7 +50,6 @@ const Categories = () => {
   const fetchProducts = async () => {
     try {
       const response = await productApi.getAll();
-      console.log('Products fetched:', response);
       setProducts(extractArray(response));
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -109,15 +107,10 @@ const Categories = () => {
       if (formData.parentId) {
         submitData.parentId = formData.parentId;
       }
-
-      console.log('Submitting category:', submitData);
-      console.log('Edit mode:', editMode);
-      console.log('Selected category ID:', selectedCategoryId);
       
       if (editMode) {
         // Make sure we have a valid ID (handle both _id and id)
         const categoryId = selectedCategoryId;
-        console.log('Updating category with ID:', categoryId);
         await categoryApi.update(categoryId, submitData);
         alert('Category updated successfully!');
       } else {
@@ -252,10 +245,8 @@ const Categories = () => {
   };
 
   const handleEdit = (category) => {
-    console.log('Editing category:', category);
     // Handle both _id (MongoDB) and id
     const categoryId = category._id || category.id;
-    console.log('Category ID for edit:', categoryId);
     
     setEditMode(true);
     setSelectedCategoryId(categoryId);

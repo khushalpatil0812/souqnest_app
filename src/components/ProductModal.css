@@ -112,7 +112,7 @@
 }
 
 .product-modal-loading p {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   color: #64748B;
 }
@@ -128,7 +128,7 @@
 }
 
 .product-modal-error p {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   color: #DC2626;
 }
@@ -139,7 +139,7 @@
   color: #FFFFFF;
   border: none;
   border-radius: 12px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   cursor: pointer;
 }
@@ -185,7 +185,7 @@
 }
 
 .product-modal-no-image span {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
 }
 
@@ -272,7 +272,7 @@
   gap: 6px;
   padding: 6px 12px;
   border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
 }
@@ -289,7 +289,7 @@
 
 /* Title */
 .product-modal-title {
-  font-family: 'Fraunces', serif;
+  font-family: 'Playfair Display', serif;
   font-size: 28px;
   font-weight: 700;
   color: #0F172A;
@@ -306,20 +306,20 @@
 }
 
 .price-label {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   color: #64748B;
 }
 
 .price-value {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 32px;
   font-weight: 700;
   color: #1E40AF;
 }
 
 .price-more {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   color: #94A3B8;
 }
@@ -342,7 +342,7 @@
 }
 
 .price-currency {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 700;
   color: #64748B;
@@ -354,7 +354,7 @@
 }
 
 .price-amount {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 700;
   color: #0F172A;
@@ -374,7 +374,7 @@
   gap: 10px;
   padding: 14px 24px;
   border-radius: 14px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 700;
   text-decoration: none;
@@ -420,7 +420,7 @@
   padding: 16px 20px;
   background: none;
   border: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   color: #64748B;
@@ -463,7 +463,7 @@
 }
 
 .empty-tab {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   color: #94A3B8;
   text-align: center;
@@ -472,7 +472,7 @@
 
 /* Overview */
 .product-overview-text {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.8;
   color: #475569;
@@ -508,7 +508,7 @@
 }
 
 .feature-text {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   color: #334155;
 }
@@ -529,7 +529,7 @@
 
 .specs-table td {
   padding: 14px 16px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
 }
 
@@ -559,7 +559,7 @@
 }
 
 .faq-question {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 700;
   color: #0F172A;
@@ -567,7 +567,7 @@
 }
 
 .faq-answer {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   color: #64748B;
   line-height: 1.6;
@@ -734,3 +734,5 @@
     height: 200px;
   }
 }
+
+

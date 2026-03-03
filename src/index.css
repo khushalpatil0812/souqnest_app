@@ -5,6 +5,7 @@
    ============================================ */
 
 :root {
+  /* Colors */
   --primary:          #1E40AF;
   --primary-dark:     #1E3A8A;
   --primary-900:      #0F172A;
@@ -29,6 +30,38 @@
   --shadow-premium:   0 20px 25px -5px rgba(0,0,0,0.08);
   --radius-card:      0.75rem;
   --radius-btn:       0.5rem;
+
+  /* Typography - Font Families */
+  --font-body:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-display:     'Playfair Display', serif;
+  --font-mono:        'JetBrains Mono', monospace;
+
+  /* Typography - Font Sizes */
+  --text-xs:          0.75rem;
+  --text-sm:          0.875rem;
+  --text-base:        1rem;
+  --text-lg:          1.125rem;
+  --text-xl:          1.25rem;
+  --text-2xl:         1.5rem;
+  --text-3xl:         2rem;
+  --text-4xl:         2.5rem;
+  --text-5xl:         3rem;
+  --text-6xl:         3.75rem;
+
+  /* Typography - Line Heights */
+  --leading-tight:    1.25;
+  --leading-snug:     1.375;
+  --leading-normal:   1.5;
+  --leading-relaxed:  1.625;
+  --leading-loose:    2;
+
+  /* Typography - Font Weights */
+  --font-light:       300;
+  --font-normal:      400;
+  --font-medium:      500;
+  --font-semibold:    600;
+  --font-bold:        700;
+  --font-extrabold:   800;
 }
 
 @tailwind base;
@@ -55,8 +88,7 @@
   }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: var(--bg);
@@ -68,8 +100,8 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
     letter-spacing: -0.02em;
     opacity: 1;
     color: var(--text-primary);
@@ -91,8 +123,131 @@
   }
 
   code, pre {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
   }
+}
+
+/* ============================================
+   TYPOGRAPHY UTILITIES
+   ============================================ */
+
+/* Display/Hero Text */
+.text-display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: var(--font-extrabold);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+}
+
+.text-display {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+}
+
+/* Heading Text */
+.text-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-snug);
+}
+
+.text-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-snug);
+}
+
+.text-h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-snug);
+}
+
+.text-h4 {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-snug);
+}
+
+/* Body Text */
+.text-body-lg {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-relaxed);
+}
+
+.text-body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-relaxed);
+}
+
+.text-body-sm {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-normal);
+}
+
+.text-body-xs {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-normal);
+}
+
+/* Label/UI Text */
+.text-label {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-normal);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.text-label-sm {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: 0.04em;
+}
+
+/* Button Text */
+.text-button {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: 0.03em;
+}
+
+/* Subtitles/Captions */
+.text-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-relaxed);
+  color: var(--text-secondary);
+}
+
+.text-caption {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-snug);
+  color: var(--text-muted);
 }
 
 /* Page wrapper — constrain max width */
@@ -422,12 +577,28 @@ footer a:hover::after {
   background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow-soft);
-  transition: box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease-in-out;
+  transform: translateY(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.navbar-container.navbar-hidden {
+  transform: translateY(-100%);
+  box-shadow: none;
+}
+
+.navbar-container.navbar-visible {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .navbar-inner {
@@ -712,10 +883,12 @@ footer a:hover::after {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    padding-top: 68px;
   }
 
   .public-layout-main {
     flex-grow: 1;
+    margin-bottom: 60px;
   }
 
 /* ============================================
@@ -723,14 +896,14 @@ footer a:hover::after {
    ============================================ */
 
 .footer-premium {
-  background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
-  color: rgba(255,255,255,0.55);
-  padding: clamp(36px, 5vw, 64px) clamp(16px, 5vw, 80px) 20px;
-  border-top: 0;
+  background: linear-gradient(160deg, #0F1B2E 0%, #1A2847 50%, #1E3A5A 100%);
+  color: #94A3B8;
+  padding: clamp(48px, 6vw, 64px) clamp(16px, 5vw, 80px);
+  border-top: 1px solid rgba(30, 58, 138, 0.25);
   margin-top: 0;
   box-sizing: border-box;
   position: relative;
-  box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.35);
+  box-shadow: 0 -1px 0 rgba(30, 58, 138, 0.15);
 }
 
 .footer-container {
@@ -742,10 +915,12 @@ footer a:hover::after {
 .footer-main {
   display: grid;
   grid-template-columns: 1.6fr 1fr 1fr 1.2fr 1.2fr;
-  gap: 28px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding-bottom: 28px;
-  align-items: flex-start;
+  gap: 40px;
+  border-bottom: 1px solid rgba(30, 58, 138, 0.2);
+  padding-bottom: clamp(40px, 5vw, 48px);
+  align-items: center;
+  min-height: 280px;
+  justify-items: start;
 }
 
 .footer-brand {
@@ -758,35 +933,34 @@ footer a:hover::after {
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .footer-logo-icon {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   background: linear-gradient(135deg, #1E40AF, #1E3A8A);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-family: 'Playfair Display', serif;
   font-weight: 700;
-  font-size: 22px;
+  font-size: 20px;
 }
 
 .footer-logo-text {
-  font-family: 'Playfair Display', serif;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
-  color: #fff;
+  color: #E2E8F0;
+  letter-spacing: 0.01em;
 }
 
 .footer-desc {
-  color: rgba(255,255,255,0.55);
+  color: #94A3B8;
   font-size: 0.9rem;
-  margin-bottom: 18px;
-  line-height: 1.6;
+  margin-bottom: 16px;
+  line-height: 1.7;
   max-width: 280px;
 }
 
@@ -796,11 +970,11 @@ footer a:hover::after {
 }
 
 .footer-links h4, .footer-categories h4, .footer-contact h4, .footer-social h4 {
-  color: #fff;
-  font-size: 0.78rem;
+  color: #E2E8F0;
+  font-size: 0.75rem;
   font-weight: 700;
   margin-bottom: 14px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -811,16 +985,16 @@ footer a:hover::after {
 }
 
 .footer-links ul li, .footer-categories ul li, .footer-contact ul li {
-  margin-bottom: 10px;
-  color: rgba(255,255,255,0.55);
-  font-size: 0.88rem;
+  margin-bottom: 11px;
+  color: #94A3B8;
+  font-size: 0.9rem;
 }
 
 .footer-links ul li a,
 .footer-categories ul li a {
-  color: rgba(255,255,255,0.55);
+  color: #CBD5E1;
   text-decoration: none;
-  transition: color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+  transition: color 0.25s ease, transform 0.25s ease;
   position: relative;
   display: inline-block;
 }
@@ -834,14 +1008,13 @@ footer a:hover::after {
   width: 0;
   height: 1px;
   background: #1E40AF;
-  transition: width 0.3s ease;
+  transition: width 0.25s ease;
 }
 
 .footer-links ul li a:hover,
 .footer-categories ul li a:hover {
-  color: #93C5FD;
+  color: #1E40AF;
   transform: translateY(-1px);
-  text-shadow: 0 6px 14px rgba(30,58,138,0.35);
 }
 
 .footer-links ul li a:hover::after,
@@ -852,12 +1025,12 @@ footer a:hover::after {
 .footer-contact ul li {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  line-height: 1.5;
+  gap: 9px;
+  line-height: 1.6;
 }
 
 .footer-contact ul li svg {
-  color: #93C5FD;
+  color: #1E40AF;
   margin-top: 2px;
   flex-shrink: 0;
 }
@@ -870,23 +1043,23 @@ footer a:hover::after {
 }
 
 .footer-social-row a {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.14);
-  color: rgba(255,255,255,0.55);
-  transition: color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(30, 58, 138, 0.15);
+  border: 1px solid rgba(30, 58, 138, 0.25);
+  color: #1E40AF;
+  transition: all 0.25s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .footer-social-row a:hover {
-  color: #93C5FD;
+  color: #E2E8F0;
+  background: #1E40AF;
+  border-color: #1E40AF;
   transform: translateY(-2px);
-  text-shadow: 0 8px 18px rgba(30,58,138,0.35);
-  border-color: rgba(147, 197, 253, 0.5);
 }
 
 .footer-cta-btns {
@@ -899,26 +1072,28 @@ footer a:hover::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 9px 14px;
-  border-radius: 10px;
-  font-size: 0.82rem;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #FFFFFF;
+  color: #E2E8F0;
   text-decoration: none;
-  background: linear-gradient(135deg, #1E40AF, #1E3A8A);
-  border: 1px solid transparent;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  background: rgba(30, 58, 138, 0.18);
+  border: 1px solid rgba(30, 58, 138, 0.3);
+  transition: all 0.25s ease;
 }
 
 .footer-cta-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(30, 64, 175, 0.3);
+  background: rgba(30, 58, 138, 0.28);
+  border-color: rgba(30, 58, 138, 0.48);
+  color: #1E40AF;
 }
 
 .footer-cta-btn.footer-cta-outline {
   background: transparent;
-  border-color: rgba(255,255,255,0.25);
-  color: rgba(255,255,255,0.9);
+  border-color: rgba(30, 58, 138, 0.35);
+  color: #CBD5E1;
 }
 
 .footer-bottom {
@@ -926,87 +1101,76 @@ footer a:hover::after {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  color: rgba(255,255,255,0.55);
-  font-size: 0.82rem;
-  padding: 18px 0 6px;
+  gap: 5px;
+  color: #64748B;
+  font-size: 0.8rem;
+  padding: 5px 0;
+  border-top: 1px solid rgba(30, 58, 138, 0.15);
 }
 
 @media (max-width: 1024px) {
   .footer-main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 32px;
-    justify-items: start;
+    align-items: center;
+    min-height: 360px;
   }
 
   .footer-brand {
     grid-column: 1 / -1;
-    text-align: left;
-  }
-
-  .footer-links, .footer-categories, .footer-contact, .footer-social {
-    text-align: left;
-  }
-
-  .footer-desc {
-    max-width: 100%;
-    margin-left: 0;
-    margin-right: 0;
   }
 }
 
 @media (max-width: 768px) {
+  .public-layout-shell {
+    padding-top: 60px;
+  }
+
+  .public-layout-main {
+    margin-bottom: 40px;
+  }
+
   .footer-main {
     grid-template-columns: 1fr;
-    gap: 24px;
-    justify-items: stretch;
+    gap: 28px;
+    padding-bottom: 28px;
+    min-height: auto;
+    align-items: stretch;
   }
 
-  .footer-brand {
-    text-align: left;
-  }
-
-  .footer-links, .footer-categories, .footer-contact, .footer-social {
-    text-align: left;
-  }
-
-  .footer-links h4, .footer-contact h4, .footer-social h4 {
-    margin-bottom: 12px;
+  .footer-desc {
+    max-width: 100%;
   }
 
   .footer-bottom {
     flex-direction: column;
-    text-align: center;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 5px;
   }
-
-  .footer-social-row { justify-content: flex-start; }
 }
 
 @media (max-width: 480px) {
+  .public-layout-shell {
+    padding-top: 60px;
+  }
+
+  .footer-premium {
+    padding: clamp(40px, 5vw, 48px) 16px;
+  }
+
   .footer-main {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 24px;
+    padding-bottom: 24px;
+    min-height: auto;
   }
-
-  .footer-brand {
-    text-align: left;
-  }
-
-  .footer-links,
-  .footer-categories,
-  .footer-contact,
-  .footer-social {
-    text-align: left;
-    min-width: 0;
-  }
-
-  .footer-social-row { justify-content: flex-start; }
 
   .footer-bottom {
     flex-direction: column;
-    text-align: center;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 5px;
+    font-size: 0.75rem;
+    padding: 5px 0;
   }
 }
 
@@ -1362,3 +1526,5 @@ a[class*="quote"]::after {
     scroll-behavior: auto !important;
   }
 }
+
+

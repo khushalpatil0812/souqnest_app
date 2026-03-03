@@ -1,9 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiSearch, FiMenu, FiX, FiShoppingBag } from 'react-icons/fi';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    let scrollTimeout;
+    let ticking = false;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollThreshold = 100; // Hide navbar only after scrolling past 100px
+      
+      // Scroll up: show navbar
+      if (currentScrollY < lastScrollY || currentScrollY < scrollThreshold) {
+        if (!isVisible) {
+          setIsVisible(true);
+        }
+      } 
+      // Scroll down: hide navbar (only if past threshold)
+      else if (currentScrollY > lastScrollY && currentScrollY > scrollThreshold) {
+        if (isVisible) {
+          setIsVisible(false);
+          setIsMenuOpen(false); // Close mobile menu when navbar hides
+        }
+      }
+      
+      setLastScrollY(currentScrollY);
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(handleScroll);
+        ticking = true;
+      }
+    };
+
+    // Use passive listener for better scroll performance
+    window.addEventListener('scroll', onScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', onScroll, { passive: true });
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+    };
+  }, [lastScrollY, isVisible]);
 
   const menuItems = [
     { name: 'Home', path: '/' },
@@ -13,16 +57,16 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="navbar-container">
+    <nav className={`navbar-container ${isVisible ? 'navbar-visible' : 'navbar-hidden'}`}>
       <div className="navbar-inner">
         <div className="navbar-content">
           {/* Logo - Premium Branding */}
           <Link to="/" className="navbar-logo">
             <div className="navbar-logo-icon">
-              <span>A</span>
+              <span>S</span>
             </div>
             <span className="navbar-logo-text">
-              ADMN
+              SOUQNEST
             </span>
           </Link>
 
@@ -49,7 +93,7 @@ const Navbar = () => {
             </Link>
             <Link to="/rfq">
               <button className="navbar-cta-btn">
-                Quote
+                Contact Us
               </button>
             </Link>
           </div>

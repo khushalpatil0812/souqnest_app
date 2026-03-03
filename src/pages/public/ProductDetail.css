@@ -18,8 +18,8 @@
   --product-detail-gray-800: #1E293B;
   --product-detail-success: #10B981;
   --product-detail-warning: #F59E0B;
-  --product-detail-font-display: 'Fraunces', serif;
-  --product-detail-font-body: 'DM Sans', sans-serif;
+  --product-detail-font-display: 'Playfair Display', serif;
+  --product-detail-font-body: var(--font-body);
 }
 
 /* Page Container */
@@ -1029,3 +1029,5 @@
     font-size: 0.875rem;
   }
 }
+
+
